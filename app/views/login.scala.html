@@ -1,0 +1,18 @@
+@(loginForm: Form[model.User])
+@import helper._
+@import helper.twitterBootstrap._
+@main("Login") {
+
+	<header>
+		<h1>Willkommen bei</h1>
+		<div id="titelbild" src="URL für UNO-Bild"></div>
+		<h1>Online</h1>
+		<h3>Ein Projekt von B.Pllana, D.Sickel und V.Weirich</h3>
+	</header>
+	<h2>Login:</h2>
+	@helper.form(action = routes.Application.startseite(), 'id -> "loginForm") {
+		@helper.inputText(loginForm("username"))
+		<button type="submit">Login</button>
+	}
+	
+}

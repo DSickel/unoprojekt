@@ -1,0 +1,20 @@
+@(user: model.User)
+@main("Startseite") {
+
+	<header>
+		<h1>Willkommen bei</h1>
+		<div id="titelbild" src="URL für UNO-Bild"></div>
+		<h1>Online</h1>
+		<h3>Ein Projekt von B.Pllana, D.Sickel und V.Weirich</h3>
+	</header>
+	<h3>Hello @user.username!</h3>
+	<div class="buttons">
+		<a href="@routes.UnoGame.spiel_erstellen()">Spiel erstellen</a>
+	</div>
+	<div class="buttons">
+		<a href="@routes.UnoGame.spiel_beitreten()">Spiel beitreten</a>
+	</div>
+	<div class="buttons">
+		<a href="@routes.UnoGame.regelwerk()">Regelwerk</a>
+	</div>
+}

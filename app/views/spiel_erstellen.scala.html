@@ -1,0 +1,44 @@
+@main("Startseite") {
+
+
+	<header>
+		<div id="titelbild" src="URL für UNO-Bild"></div>
+		<h2>Spielmenü</h2>
+		<h3>Ein Projekt von B.Pllana, D.Sickel und V.Weirich</h3>
+	</header>
+	<div>
+		<h3>Spielmodus wählen:</h3>
+		<p>
+			<input type="radio" value="R" name="regel" />mit Basisregeln spielen
+		</p>
+		<p>
+			<input type="radio" value="R" name="regel" />mit erweiterten Regeln
+			spielen
+		</p>
+
+	</div>
+	<div>
+		<h3>Anzahl Spieler festlegen:</h3>
+		<p>
+			<select><option>2 Spieler</option>
+				<option>3 Spieler</option>
+				<option>4 Spieler</option></select>
+		</p>
+	</div>
+	<div>
+		<h3>Spielname eingeben:</h3>
+		<input type="text" placeholder="Spielername`s Spiel">
+	</div>
+	<div>
+		<button onclick="einstellungen()">Spiel starten</button>
+		<span id="script"></span>
+		<script>
+			function einstellungen(){
+				$("#script").html("<p>Spiel mit diesen Einstellungen starten?</p>"+
+						"<p><button type='submit' method='GET'>Ja</button>"+
+						"<button type='submit' method='GET'>Nein</button></p>");
+				$("#script").css("color", "red");
+			}
+		</script>
+	</div>
+}
