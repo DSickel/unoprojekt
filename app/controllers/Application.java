@@ -3,6 +3,7 @@ package controllers;
 import play.*;
 import play.mvc.*;
 import views.html.*;
+import model.Web_Socket;
 import model.User;
 import play.data.*;
 
@@ -20,6 +21,10 @@ public class Application extends Controller {
     }
     
     public static Result startseite() {
+    	String username = session("User1");
+    	if(username != null){
+    		return ok(startseite.render(new User(username)));
+    	}
     	Form<User> userForm = loginForm.bindFromRequest();
     	if(userForm.hasErrors()){
     		return badRequest(login.render(userForm));
@@ -31,15 +36,16 @@ public class Application extends Controller {
     	}
     }
     
-    public static Result start() {
-    	String user = session("User1");
-    	if(user != null){
-    		return ok(startseite.render(new User(user)));
-    	}else{
-    		return ok(login.render(loginForm));
-    	}
-    	
+    public static Result testChat(){
+    	return ok(ChatRoom.render());
     }
-   
-   
+    
+    public static WebSocket<String> webSocket(){
+    	return new WebSocket<String>(){
+    		
+    		public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out){
+    			Web_Socket.start(in, out);
+    		}
+    	};
+    }
 }	

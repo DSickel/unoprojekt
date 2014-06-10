@@ -6,12 +6,17 @@ import java.util.List;
 import play.data.validation.Constraints.Required;
 import play.data.validation.ValidationError;
 
+/**
+ * Handles the User Login + "Validation"
+ * @author Dominic
+ *
+ */
 public class User {
 	@Required
 	public String username;
 	
 	public User(){
-		
+		//Default constructor
 	}
 	
 	public User(String username) {
