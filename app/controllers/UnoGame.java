@@ -46,7 +46,8 @@ public class UnoGame extends Controller{
 	}
 	
 	public static Result gameplay(){
-		return TODO;
+		
+		return ok(gameboard.render("MESSAGE"));
 	}
 	
 	

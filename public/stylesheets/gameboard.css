@@ -1,0 +1,59 @@
+@CHARSET "utf-8";
+
+* {
+    margin: 0;
+    padding: 0;
+}
+html, body {
+    width: 100%; 
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+body {
+    font: 120% sans-serif;
+}
+p {
+    padding: 1em;
+    color: white;
+    display: table-cell;
+    /*border: 1px solid blue;*/
+}
+.leer{
+    background-color: #99B1D7;
+}
+.spielekarten{
+    background-color: #B04C80;
+}
+.spielfeld {
+    display: table;
+    border-collapse: separate;
+    /*border-spacing: 2px;*/
+}
+.zeile {
+    display: table-row;
+}
+.ablage{
+    display: inline-block;
+    vertical-align: middle;
+    display: table-cell;
+    background-color: #99B1D7;
+    /*border: 1px solid blue;*/
+    padding: auto;
+}
+.input{
+    vertical-align: bottom;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    padding: 0.4em;
+}
+.output{
+    color: black;
+    width: auto;
+}
+
+.chat{
+    vertical-align: bottom;
+    background-color: #99B1D7;
+}

@@ -15,6 +15,7 @@ public class User {
 	@Required
 	public String username;
 	
+	
 	public User(){
 		//Default constructor
 	}
