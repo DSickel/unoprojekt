@@ -37,7 +37,8 @@ public class Application extends Controller {
     }
     
     public static Result testChat(){
-    	return ok(ChatRoom.render());
+    	String username = session("User1");
+    	return ok(ChatRoom.render(username));
     }
     
     public static WebSocket<String> webSocket(){
