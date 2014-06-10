@@ -13,14 +13,14 @@ GET 	/startseite					controllers.Application.startseiteGet()
 #GetStarted
 GET		/spiel_erstellen			controllers.GetStarted.spiel_erstellen()
 GET		/regelwerk					controllers.GetStarted.regelwerk()
+GET		/spiel_beitreten			controllers.UnoGame.spiel_beitreten()
 
 #UnoGame
-GET		/spiel_beitreten			controllers.UnoGame.spiel_beitreten()
 GET		/game						controllers.UnoGame.gameplay()
 
 #Test
 GET		/chat						controllers.Application.testChat()
-GET		/webSocket					controllers.Application.webSocket()
+GET		/webSocket					controllers.Application.webSocket(username)
 
 
 # Map static resources from the /public folder to the /assets URL path

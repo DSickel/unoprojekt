@@ -1,4 +1,4 @@
-@(message: String)
+@(username: String)
 @main("Chatroom") {
 	
 	<h1>Chat Room Test</h1>
@@ -11,20 +11,26 @@
 	</div>
 	<script type="text/javascript">
 	$(function(){
-
+		
 	    var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
 	    
 	 	//open connection with websocket
-	    var socket = new WS('@routes.Application.webSocket().webSocketURL(request)');
+	    var socket = new WS('@routes.Application.webSocket(username).webSocketURL(request)');
 	    
 	    var writeMessages = function(event){
-	        $('#socket-output').append('<p>'+"@message"+": "+event.data+'</p>');
+	    	var date = new Date();
+	    	var hours = date.getHours();
+	    	var minutes = date.getMinutes();
+	    	if(minutes < 10){
+	    		minutes = "0"+minutes;
+	    	}
+	        $('#socket-output').append('<p>['+hours+':'+minutes+'] ' +event.data+'</p>');
 	    }
 	    
 	    socket.onmessage = writeMessages;
 	    
 	    $("#input").click(function(event){
-	            socket.send($("#socket-input").val());
+	            socket.send("@username" + ": " + $("#socket-input").val());
 	            $("#socket-input").val('');    
 	    }); 
 	    
@@ -33,7 +39,7 @@
 	       
 	        // if enter (charcode 13) is pushed, send message, then clear input field
 	        if(charCode === 13){
-	            socket.send($(this).val());
+	            socket.send("@username" + ": " +  $(this).val());
 	            $(this).val('');    
 	        }
 	    }); 
