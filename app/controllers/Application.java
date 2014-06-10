@@ -47,7 +47,7 @@ public class Application extends Controller {
     	return ok(ChatRoom.render(username));
     }
     
-    public static WebSocket<String> webSocket(){
+    public static WebSocket<String> webSocket(final String username){
     	return new WebSocket<String>(){
     		
     		public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out){
