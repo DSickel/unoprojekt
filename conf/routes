@@ -8,7 +8,7 @@ GET     /                           controllers.Application.index()
 #Login
 GET		/login						controllers.Application.login()
 POST	/startseite					controllers.Application.startseite()
-GET 	/startseite					controllers.Application.startseite()
+GET 	/startseite					controllers.Application.startseiteGet()
 
 #GetStarted
 GET		/spiel_erstellen			controllers.GetStarted.spiel_erstellen()

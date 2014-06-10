@@ -21,11 +21,8 @@ public class Application extends Controller {
     }
     
     public static Result startseite() {
-    	String username = session("User1");
-    	if(username != null){
-    		return ok(startseite.render(new User(username)));
-    	}
     	Form<User> userForm = loginForm.bindFromRequest();
+    	
     	if(userForm.hasErrors()){
     		return badRequest(login.render(userForm));
     	}else{
@@ -33,6 +30,15 @@ public class Application extends Controller {
     		session().clear();
     		session("User1", user.username);
     		return ok(startseite.render(user));
+    	}
+    }
+    
+    public static Result startseiteGet(){
+    	String username = session("User1");
+    	if(username != null){
+    		return ok(startseite.render(new User(username)));
+    	}else{
+    		return redirect("/login");
     	}
     }
     
