@@ -10,7 +10,7 @@ import play.data.*;
 
 public class UnoGame extends Controller{
 	
-	
+	/*
 	
 	public static WebSocket<String> websocket() {
 		WebSocket<String> webSocket = null;
@@ -39,7 +39,7 @@ public class UnoGame extends Controller{
 			}
 		};
 		return webSocket;
-	}
+	}*/
 	
 	public static Result spiel_beitreten(){
 		return ok(spiel_beitreten.render());
