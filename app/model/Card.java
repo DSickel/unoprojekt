@@ -1,5 +1,10 @@
 package model;
 
+/**
+ * Used to create Cards for Uno-Game
+ * @author Dominic
+ *
+ */
 public class Card {
 	
 	public enum Color {
@@ -46,6 +51,6 @@ public class Card {
 	}
 	
 	public void playEffect(Game game) {
-		//TODO
+		//Default: No effect
 	}
 }

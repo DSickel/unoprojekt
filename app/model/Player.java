@@ -17,6 +17,7 @@ public class Player {
 	public Player(String playerName, String iD){
 		this.playerName = playerName;
 		this.iD = iD;
+		handCards = new ArrayList<Card>();
 	}
 
 	public String getPlayerName() {
@@ -31,13 +32,18 @@ public class Player {
 		return handCards;
 	}
 
-	public void drawCard(){
-		//TODO
+	public void drawCard(Card setCard){
+		handCards.add(setCard);
 	}
 	
-	public void playCard(){
-		//TODO
+	public Card playCard(int index, Card trayCard){
+		if(handCards.get(index).playable(trayCard)) {
+			return handCards.remove(index);
+		}
+		return null;
 	}
+	
+	
 	
 	
 }
