@@ -3,11 +3,12 @@
 
 	<header>
 		<div id="titelbild" src="URL für UNO-Bild"></div>
-		<h2>Spielmenü</h2>
-		<h3>Ein Projekt von B.Pllana, D.Sickel und V.Weirich</h3>
+		<h2>Neues Spiel erstellen.</h2>
+		<h3>Let's play Uno!</h3>
 	</header>
 	<div>
-		<h3>Spielmodus wählen:</h3>
+		<h3>Welcher Spielmodus?</h3>
+		<!-- 
 		<p>
 			<input type="radio" value="R" name="regel" />mit Basisregeln spielen
 		</p>
@@ -15,14 +16,27 @@
 			<input type="radio" value="R" name="regel" />mit erweiterten Regeln
 			spielen
 		</p>
+		-->
+		#{formfield 'type'}
+		<p>
+			<input type="radio" name="type" value="a" #{if field.value=='a'}checked="checked"#{/if}>
+   			 Normale Spielregeln
+   		</p>
+   		<p>
+			<input type="radio" name="type" value="b" #{if field.value=='b'}checked="checked"#{/if}>
+   			 Erweiterte Spielregeln
+   		</p>
+		#{/formfield}
 
 	</div>
 	<div>
 		<h3>Anzahl Spieler festlegen:</h3>
 		<p>
-			<select><option>2 Spieler</option>
+			<select id="selector">
+				<option>2 Spieler</option>
 				<option>3 Spieler</option>
-				<option>4 Spieler</option></select>
+				<option>4 Spieler</option>
+			</select>
 		</p>
 	</div>
 	<div>
