@@ -15,9 +15,13 @@ public class Game {
 	private int currentPlayer;
 	private int direction;
 	
-	private final int numberOfPlayers;
+	private int numberOfPlayers;
 	
 	/**Konstruktor*/
+	
+	public Game(){
+		//Defaulkonstruktor
+	}
 	
 	public Game(ArrayList<Player> players, int numberOfPlayers){
 		this.players = players;
