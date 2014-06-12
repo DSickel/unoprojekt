@@ -7,9 +7,12 @@
 		<h1>Online</h1>
 		<h3>Ein Projekt von B.Pllana, D.Sickel und V.Weirich</h3>
 	</header>
-	<h3>Hello @user.username!</h3>
-	<div class="buttons">
-		<a href="@routes.GetStarted.spiel_erstellen()">Spiel erstellen</a>
+	<h3 class="hover">Hello @user.username!</h3>
+	<div id="erstellen" class="buttons">
+		<a  href="@routes.GetStarted.spiel_erstellen()">Spiel erstellen</a>
+		<div id="infobox" style="visibilty: hidden">
+			Hier steht bisschen Infotext
+		</div>
 	</div>
 	<div class="buttons">
 		<a href="@routes.UnoGame.spiel_beitreten()">Spiel beitreten</a>
@@ -20,4 +23,20 @@
 	<div class="buttons">
 		<a href="@routes.Application.testChat()">Chatroom betreten</a>
 	</div>
+	<script type="text/javascript">
+	
+	        
+		$("#erstellen").mouseover(function() {
+			$("#infobox").css('visibility','visible')
+		});
+		
+		$("#infobox").mouseover(function() {
+			$("#infobox").css('visibility','visible')
+		});
+		
+		$("#infobox").mouseout(function() {
+			$("#infobox").css('visibility','hidden')
+		});
+	
+	</script>
 }

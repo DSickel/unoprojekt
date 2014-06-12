@@ -3,7 +3,10 @@ package model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
+import util.IObserver;
+import util.IObserverable;
 import model.Card.Color;
 import model.Card.Value;
 
@@ -12,7 +15,8 @@ import model.Card.Value;
  * @author Dominic
  *
  */
-public class Game {
+public class Game implements IObserverable{
+	private List<IObserver> observers;
 	
 	private String gameName;
 	
@@ -32,6 +36,7 @@ public class Game {
 	}
 	
 	public Game(ArrayList<Player> players, int numberOfPlayers, String gameName){
+		this.observers = new ArrayList<IObserver>();
 		this.gameName = gameName;
 		this.players = players;
 		this.currentPlayer = (int) (Math.random()) * players.size() + 1;
@@ -124,5 +129,35 @@ public class Game {
 			//ziehe die oberste Karte vom cardSet
 			player.drawCard(cardSet.remove(0));
 		}
+	}
+
+	public void play(Player player, int index) {
+		Card card = player.playCard(index, cardTray.get(0));
+		if(card != null) {
+			cardTray.add(card);
+		}
+		System.out.println("Karte nicht spielbar!");
+	}
+	
+	/**Implementierung des Observerable Patterns */
+	
+	//Game registriert sich beim Observer
+	public void register(IObserver observer) {
+		this.observers.add(observer);
+		
+	}
+	
+	//Game meldet sich vom Observer ab
+	public void unregister(IObserver observer) {
+		this.observers.remove(observer);
+		
+	}
+
+	//Iteriert über die Liste aller Observer und ruft deren update() Methode auf
+	public void notifyObservers() {
+		for(IObserver observer : this.observers){
+			observer.update();
+		}
+		
 	}
 }

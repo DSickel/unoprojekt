@@ -4,11 +4,12 @@ import play.*;
 import play.libs.F.Callback;
 import play.libs.F.Callback0;
 import play.mvc.*;
+import util.IObserver;
 import views.html.*;
 import model.User;
 import play.data.*;
 
-public class UnoGame extends Controller{
+public class UnoGame extends Controller implements IObserver{
 	
 	/*
 	
@@ -48,6 +49,12 @@ public class UnoGame extends Controller{
 	public static Result gameplay(){
 		
 		return ok(gameboard.render("MESSAGE"));
+	}
+
+	/** Implementierung des Observer Patterns*/
+	public void update() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	
