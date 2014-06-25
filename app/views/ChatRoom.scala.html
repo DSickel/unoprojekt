@@ -5,41 +5,53 @@
 	<div id="socket-output">
 		<p>Chatfenster:</p>
 	</div>
+	<p id="test"></p>
 	<div id="chatfenster">
-		<input id="socket-input" type="text"/>
+		<input id="socketinput" type="text"/>
 		<button id="input">Send</button>
 	</div>
 	<script type="text/javascript">
+	
 	$(function(){
 		
 	    var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
 	    
 	 	//open connection with websocket
-	    var socket = new WS('@routes.Application.webSocket(username).webSocketURL(request)');
-	    
+	    var socket = new WS('@routes.Application.webSocket().webSocketURL(request)');   
 	    var writeMessages = function(event){
+	    	var jsonMsg = JSON.parse(event.data);
 	    	var date = new Date();
 	    	var hours = date.getHours();
 	    	var minutes = date.getMinutes();
 	    	if(minutes < 10){
 	    		minutes = "0"+minutes;
 	    	}
-	        $('#socket-output').append('<p>['+hours+':'+minutes+'] ' +event.data+'</p>');
+	        $('#socket-output').append('<p>'+jsonMsg.user+' ['+hours+':'+minutes+'] ' +jsonMsg.text+'</p>');
 	    }
 	    
 	    socket.onmessage = writeMessages;
 	    
 	    $("#input").click(function(event){
-	            socket.send("@username" + ": " + $("#socket-input").val());
-	            $("#socket-input").val('');    
+	    	   var jsonMessage = {
+	   	    		type: "message",
+	   	    		user: "@username",
+	   	    		text: document.getElementById("socketinput").value
+	   	    	};
+	            socket.send(JSON.stringify(jsonMessage));
+	            $("#socketinput").val('');    
 	    }); 
 	    
-	    $('#socket-input').keyup(function(event){
+	    $('#socketinput').keyup(function(event){
 	        var charCode = (event.which) ? event.which : event.keyCode ;
 	       
 	        // if enter (charcode 13) is pushed, send message, then clear input field
 	        if(charCode === 13){
-	            socket.send("@username" + ": " +  $(this).val());
+	        	var jsonMessage = {
+		   	    		type: "message",
+		   	    		user: "@username",
+		   	    		text: document.getElementById("socketinput").value
+		   	    };
+	            socket.send(JSON.stringify(jsonMessage));
 	            $(this).val('');    
 	        }
 	    }); 

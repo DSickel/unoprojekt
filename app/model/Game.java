@@ -19,6 +19,7 @@ public class Game implements IObserverable{
 	private List<IObserver> observers;
 	
 	private String gameName;
+	private int gameID;
 	
 	private ArrayList<Player> players;
 	private ArrayList<Card>	cardSet;
@@ -35,34 +36,10 @@ public class Game implements IObserverable{
 		//Defaulkonstruktor
 	}
 	
-	public Game(ArrayList<Player> players, int numberOfPlayers, String gameName){
+	public Game(String gameName, int gameID){
 		this.observers = new ArrayList<IObserver>();
 		this.gameName = gameName;
-		this.players = players;
-		this.currentPlayer = (int) (Math.random()) * players.size() + 1;
-		this.currentDirection = 1;
-		this.numberOfPlayers = numberOfPlayers;
-		this.cardSet = new ArrayList<Card>();
-		
-		//füge jeweils 4 Karten jeder Sorte dem cardSet hinzu
-		for(Color color : Color.values()) {
-			for(Value value : Value.values()) {
-				for(int count = 4; count >= 4; count--) {
-					Card card = new Card(color, value);
-					cardSet.add(card);
-				}
-			}
-		}
-		//Mische das cardSet
-		shuffle(cardSet);
-		
-		//Teile jedem Spieler 7 Karten aus
-		for(Player player : players) {
-			draw(player, 7);
-		}
-		
-		//Setze erste Karte des cardTray => setze Startkarte
-		this.cardTray.add(0, cardSet.remove(0));
+		this.gameID = gameID;
 	}
 
 	
@@ -91,7 +68,15 @@ public class Game implements IObserverable{
 	public void setCurrentPlayer(int currentPlayer) {
 		this.currentPlayer = currentPlayer;
 	}
-
+	
+	public int getCurrentNumberOfPlayers() {
+		return numberOfPlayers;
+	}
+	
+	public void addPlayer(){
+		this.numberOfPlayers = numberOfPlayers + 1;
+	}
+	
 	public int getDirection() {
 		return currentDirection;
 	}
@@ -137,6 +122,36 @@ public class Game implements IObserverable{
 			cardTray.add(card);
 		}
 		System.out.println("Karte nicht spielbar!");
+	}
+	
+	public void startGame(ArrayList<Player> players) {
+		//Ermittelt Startspieler
+		this.currentPlayer = (int) (Math.random()) * players.size() + 1;
+		this.currentDirection = 1;
+		this.numberOfPlayers = numberOfPlayers;
+		this.cardSet = new ArrayList<Card>();
+		this.players = players;
+		
+		//füge jeweils 4 Karten jeder Sorte dem cardSet hinzu
+		for(Color color : Color.values()) {
+			for(Value value : Value.values()) {
+				for(int count = 4; count >= 4; count--) {
+					Card card = new Card(color, value);
+					card.createID();
+					cardSet.add(card);
+				}
+			}
+		}
+		//Mische das cardSet
+		shuffle(cardSet);
+		
+		//Teile jedem Spieler 5 Karten aus
+		for(Player player : players) {
+			draw(player, 5);
+		}
+		
+		//Setze erste Karte des cardTray => Startkarte
+		this.cardTray.add(0, cardSet.remove(0));
 	}
 	
 	/**Implementierung des Observerable Patterns */
