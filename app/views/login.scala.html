@@ -1,7 +1,15 @@
 @(loginForm: Form[model.User])
 @import helper._
 @import helper.twitterBootstrap._
-@main("Login") {
+
+@javaScript = {
+<script type="text/javascript">
+<!--
+
+//-->
+</script>
+}
+@main("Login")(javaScript) {
 
 	<header>
 		<h1>Willkommen bei</h1>

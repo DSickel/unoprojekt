@@ -1,32 +1,25 @@
 @(username: String)
-@main("Chatroom") {
-	
-	<h1>Chat Room Test</h1>
-	<div id="socket-output">
-		<p>Chatfenster:</p>
-	</div>
-	<p id="test"></p>
-	<div id="chatfenster">
-		<input id="socketinput" type="text"/>
-		<button id="input">Send</button>
-	</div>
-	<script type="text/javascript">
+
+@javaScript = {
+<script type="text/javascript">
 	
 	$(function(){
 		
 	    var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
 	    
 	 	//open connection with websocket
-	    var socket = new WS('@routes.Application.webSocket().webSocketURL(request)');   
+	    var socket = new WS('@routes.Application.gameWebSocket().webSocketURL(request)');   
+	 	
 	    var writeMessages = function(event){
 	    	var jsonMsg = JSON.parse(event.data);
+	    	console.log(event.data);
 	    	var date = new Date();
 	    	var hours = date.getHours();
 	    	var minutes = date.getMinutes();
 	    	if(minutes < 10){
 	    		minutes = "0"+minutes;
 	    	}
-	        $('#socket-output').append('<p>'+jsonMsg.user+' ['+hours+':'+minutes+'] ' +jsonMsg.text+'</p>');
+	        $('#socket-output').append('<p>'+jsonMsg.user+' ['+hours+':'+minutes+']: ' +jsonMsg.text+'</p>');
 	    }
 	    
 	    socket.onmessage = writeMessages;
@@ -57,4 +50,18 @@
 	    }); 
 	});
 	</script>
+}
+
+@main("Chatroom")(javaScript) {
+	
+	<h1>Chat Room Test</h1>
+	<div id="socket-output">
+		<p>Chatfenster:</p>
+	</div>
+	<p id="test"></p>
+	<div id="chatfenster">
+		<input id="socketinput" type="text"/>
+		<button id="input">Send</button>
+	</div>
+	
 }

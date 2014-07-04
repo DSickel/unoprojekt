@@ -40,6 +40,7 @@ public class Game implements IObserverable{
 		this.observers = new ArrayList<IObserver>();
 		this.gameName = gameName;
 		this.gameID = gameID;
+		this.numberOfPlayers = 1;
 	}
 
 	
@@ -174,5 +175,13 @@ public class Game implements IObserverable{
 			observer.update();
 		}
 		
+	}
+
+	public int getGameID() {
+		return gameID;
+	}
+
+	public void setGameID(int gameID) {
+		this.gameID = gameID;
 	}
 }

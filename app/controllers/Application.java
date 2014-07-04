@@ -15,6 +15,7 @@ import play.libs.F.Callback0;
 import play.mvc.*;
 import util.IObserver;
 import views.html.*;
+import model.Game;
 import model.GameController;
 import model.User;
 import play.data.*;
@@ -25,24 +26,19 @@ public class Application extends Controller implements IObserver{
 	final static Form<User> loginForm = Form.form(User.class); 
 	
 	//Liste um alle Websocket Connections zu speichern
-	private static List<WebSocket.Out<JsonNode>> connections = new ArrayList<WebSocket.Out<JsonNode>>();
-	
-	//HashMap um alle Member zu speichern
-	private static Map<String, WebSocket<JsonNode>> members = new HashMap<String, WebSocket<JsonNode>>();
-	
+	private static List<WebSocket.Out<JsonNode>> gameConnections = new ArrayList<WebSocket.Out<JsonNode>>();
 	
 	//Rendert die Index Seite
     public static Result index() {
+    	System.out.println("Projekt startet");
         return ok(index.render());
     }
    
-    
     //Rendert die Login Seite
     public static Result login() {
     	Form<User> userForm = loginForm.fill(new User("Max Mustermann"));
     	return ok(login.render(userForm));
     }
-    
     
     //Rendert die Startseite (POST)
     public static Result startseite() {
@@ -58,7 +54,6 @@ public class Application extends Controller implements IObserver{
     	}
     }
     
-    
     //Rendert die Startseite (GET)
     public static Result startseiteGet(){
     	String username = session("User1");
@@ -68,6 +63,7 @@ public class Application extends Controller implements IObserver{
     		return redirect("/login");
     	}
     }
+    //bis hierhin alles fertig
     
     
     //Rendert den ChatRoom
@@ -75,37 +71,102 @@ public class Application extends Controller implements IObserver{
     	String username = session("User1");
     	return ok(ChatRoom.render(username));
     }
+    //bis hierhin fertig
     
     
-  	
-  	//WebSocket
-
     
+    
+    public static Result spiel_erstellen() {
+    	String username = session("User1");
+    	GameController gameController = GameController.getInstance();
+    	int gameID = gameController.addGame(username);
+    	Game game = gameController.getGame(gameID);
+    	System.out.println("Game: " + game.getGameName() + " " + game.getGameID());
+    	session("matchID", Integer.toString(gameID));
+    	return ok(spielfeld.render(username));
+    }
     
   	//Rendert Spiel-beitreten Seite
-  	public static Result spiel_beitreten(){
-  		GameController gameController = GameController.getInstance();
-  	
-  		return ok(spiel_beitreten.render());
+    public static Result spielliste() {
+    	String username = session("User1");
+    	return ok(spielliste.render(username));
+    }
+    
+    public static Result aktualisieren(){
+    	GameController gameController = GameController.getInstance();
+    	Map<Integer, Game> games = gameController.getAvailableGames();
+    	ObjectNode result = Json.newObject();
+    	for(Integer key : games.keySet()){
+    		
+    	}
+    	
+    	System.out.println("DEBUG AUSGABE: " + result);
+  		return ok(result);
   	}
-  	
-  	
-  	//Rendert spielfeld Seite
-  	public static Result spielfeld(){
-  		return ok(spielfeld.render("name"));
-  	}
-  	
+    
+    public static Result beitreten(String username, String gameID) {
+    	GameController gameController = GameController.getInstance();
+    	Game game = gameController.getGame(Integer.parseInt(gameID));
+    	game.addPlayer();
+    	return redirect("/spielfeld");
+    }
+   
+    public static Result starten() {
+    	return ok();
+    }
+    
+    public static WebSocket<JsonNode> gameWebSocket() {
+    	final String user = session("User1");
+    	return new WebSocket<JsonNode>() {
+    		public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
+    			gameConnections.add(out);
+    			
+    			in.onMessage(new Callback<JsonNode>() {
+    				public void invoke(JsonNode event) throws Throwable {
+    					String action = event.get("type").asText();
+    					System.out.println(action);
+    					if(action.equals("cardEvent")){
+    						String id = event.get("iD").asText();
+    						System.out.println("ERREICHT CARDEVENT BEFEHLE");
+    						
+    					}
+    					
+    					if(action.equals("message")){
+    						System.out.println("ERREICHT MESSAGE BEFEHLE");
+    						for(WebSocket.Out<JsonNode> out : gameConnections) {
+    							out.write(event);
+    						}
+    					}
+    					
+    					
+    				}
+    			});
+    			in.onClose(new Callback0() {
+    				
+					public void invoke() throws Throwable {
+						ObjectNode node = Json.newObject();
+						node.put("text", "has closed connection!");
+						node.put("user", user);
+						for(WebSocket.Out<JsonNode> out : gameConnections) {
+							out.write(node);
+						}
+						
+					}
+				});
+    		}
+    	};
+    }
     
     //Interiert über alle Einträge in der Liste der WebSocket Verbindungen
-	public  void update() {
-		/*for(WebSocket con : connections){
+	public void update() {
+		for(WebSocket.Out<JsonNode> con : gameConnections){
 			ObjectNode event = Json.newObject();
 			con.notify();
-		}*/
+		}
 		
 	}
 	
-	public static WebSocket<JsonNode> webSocket() {
+	/*public static WebSocket<JsonNode> webSocket() {
     	
     	return new WebSocket<JsonNode>() {
 			public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
@@ -115,7 +176,7 @@ public class Application extends Controller implements IObserver{
 				in.onMessage(new Callback<JsonNode>() {
 
 					public void invoke(JsonNode argument) throws Throwable {
-			
+						
 						for(WebSocket.Out<JsonNode> out : connections) {
 							out.write(argument);
 						}
@@ -136,7 +197,7 @@ public class Application extends Controller implements IObserver{
 				});
 			}
     	};	
-    }
+    }*/
 	
 }	
 

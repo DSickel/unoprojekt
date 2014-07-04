@@ -1,5 +1,14 @@
 @(user: model.User)
-@main("Startseite") {
+
+@javaScript = {
+<script type="text/javascript">
+<!--
+
+//-->
+</script>
+}
+
+@main("Startseite")(javaScript) {
 
 	<header>
 		<h1>Willkommen bei</h1>
@@ -9,13 +18,10 @@
 	</header>
 	<h3 class="hover">Hello @user.username!</h3>
 	<div id="erstellen" class="buttons">
-		<a  href="@routes.GetStarted.spiel_erstellen()">Spiel erstellen</a>
-		<div id="infobox" style="visibilty: hidden">
-			Hier steht bisschen Infotext
-		</div>
+		<a  href="@routes.Application.spiel_erstellen()">Spiel erstellen</a>
 	</div>
 	<div class="buttons">
-		<a href="@routes.Application.spiel_beitreten()">Spiel beitreten</a>
+		<a href="@routes.Application.spielliste()">Spiel beitreten</a>
 	</div>
 	<div class="buttons">
 		<a href="@routes.GetStarted.regelwerk()">Regelwerk</a>
@@ -26,17 +32,6 @@
 	<script type="text/javascript">
 	
 	        
-		$("#erstellen").mouseover(function() {
-			$("#infobox").css('visibility','visible')
-		});
 		
-		$("#infobox").mouseover(function() {
-			$("#infobox").css('visibility','visible')
-		});
-		
-		$("#infobox").mouseout(function() {
-			$("#infobox").css('visibility','hidden')
-		});
-	
 	</script>
 }

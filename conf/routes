@@ -11,17 +11,18 @@ POST	/startseite					controllers.Application.startseite()
 GET 	/startseite					controllers.Application.startseiteGet()
 
 #GetStarted
-GET		/spiel_erstellen			controllers.GetStarted.spiel_erstellen()
 GET		/regelwerk					controllers.GetStarted.regelwerk()
-GET		/spiel_beitreten			controllers.Application.spiel_beitreten()
 
 #UnoGame
-GET		/game						controllers.Application.spielfeld()
+GET		/spielErstellen				controllers.Application.spiel_erstellen()
+GET		/spielliste					controllers.Application.spielliste()
+GET		/spielBeitreten				controllers.Application.beitreten(username, gameID)
+GET		/aktualisieren				controllers.Application.aktualisieren()
 
 #WebSocket
 GET		/chat						controllers.Application.testChat()
-GET		/webSocket					controllers.Application.webSocket()
-
+#GET		/webSocket					controllers.Application.webSocket()
+GET		/gameWebSocket				controllers.Application.gameWebSocket()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
