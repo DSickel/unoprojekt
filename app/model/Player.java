@@ -14,9 +14,9 @@ public class Player {
 	private String iD;
 	private ArrayList<Card>	handCards;
 	
-	public Player(String playerName, String iD){
+	public Player(String playerName/*, String iD*/){
 		this.playerName = playerName;
-		this.iD = iD;
+		//this.iD = iD;
 		handCards = new ArrayList<Card>();
 	}
 
@@ -27,7 +27,11 @@ public class Player {
 	public String getiD() {
 		return iD;
 	}
-
+	
+	public void setiD(String iD) {
+		this.iD = iD;
+	}
+	
 	public Collection<Card> getHandCards() {
 		return handCards;
 	}
@@ -36,12 +40,24 @@ public class Player {
 		handCards.add(setCard);
 	}
 	
+	public Card playCard(int cardId, Card trayCard){
+		Card card = new Card(cardId);
+		System.out.println("PLAYCARD WIRD AUFGERUFEN");
+		for(Card c : handCards) {
+			System.out.println("FOR-SCHLEIFE IN PLAYCARD WIRD AUFGERUFEN");
+			c.getID().equals(card.getID());
+			return c;
+		}
+		return null;
+	}
+	
+	/*
 	public Card playCard(int index, Card trayCard){
 		if(handCards.get(index).playable(trayCard)) {
 			return handCards.remove(index);
 		}
 		return null;
-	}
+	}*/
 	
 	
 	

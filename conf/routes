@@ -17,11 +17,13 @@ GET		/regelwerk					controllers.GetStarted.regelwerk()
 GET		/spielErstellen				controllers.Application.spiel_erstellen()
 GET		/spielliste					controllers.Application.spielliste()
 GET		/spielBeitreten				controllers.Application.beitreten(username, gameID)
-GET		/aktualisieren				controllers.Application.aktualisieren()
+GET		/refresh				 	controllers.Application.refresh()
+GET		/spiel						controllers.Application.starten()
+GET		/warteLobby					controllers.Application.warteLobby()
 
 #WebSocket
 GET		/chat						controllers.Application.testChat()
-#GET		/webSocket					controllers.Application.webSocket()
+#GET	/webSocket					controllers.Application.webSocket()
 GET		/gameWebSocket				controllers.Application.gameWebSocket()
 
 # Map static resources from the /public folder to the /assets URL path

@@ -29,6 +29,7 @@ public class Game implements IObserverable{
 	private int currentDirection;
 	
 	private int numberOfPlayers;
+	private boolean finished = false;
 	
 	/**Konstruktor*/
 	
@@ -40,7 +41,8 @@ public class Game implements IObserverable{
 		this.observers = new ArrayList<IObserver>();
 		this.gameName = gameName;
 		this.gameID = gameID;
-		this.numberOfPlayers = 1;
+		this.numberOfPlayers = 0;
+		this.players = new ArrayList<Player>();
 	}
 
 	
@@ -74,8 +76,9 @@ public class Game implements IObserverable{
 		return numberOfPlayers;
 	}
 	
-	public void addPlayer(){
+	public void addPlayer(Player player){
 		this.numberOfPlayers = numberOfPlayers + 1;
+		players.add(player);
 	}
 	
 	public int getDirection() {
@@ -86,6 +89,18 @@ public class Game implements IObserverable{
 		this.currentDirection = direction;
 	}
 	
+	public boolean isFull() {
+		if(players.size() < 2){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	public void finished() {
+		this.finished = true;
+		notifyObservers();
+	}
 	
 	/**Game Handling*/
 	
@@ -117,20 +132,21 @@ public class Game implements IObserverable{
 		}
 	}
 
-	public void play(Player player, int index) {
-		Card card = player.playCard(index, cardTray.get(0));
+	public void play(Player player, int cardID) {
+		Card card = player.playCard(cardID, cardTray.get(0));
 		if(card != null) {
 			cardTray.add(card);
 		}
 		System.out.println("Karte nicht spielbar!");
 	}
 	
-	public void startGame(ArrayList<Player> players) {
+	public void startGame(/*ArrayList<Player> players*/) {
 		//Ermittelt Startspieler
 		this.currentPlayer = (int) (Math.random()) * players.size() + 1;
 		this.currentDirection = 1;
 		this.numberOfPlayers = numberOfPlayers;
 		this.cardSet = new ArrayList<Card>();
+		this.cardTray = new ArrayList<Card>();
 		this.players = players;
 		
 		//füge jeweils 4 Karten jeder Sorte dem cardSet hinzu
@@ -138,7 +154,6 @@ public class Game implements IObserverable{
 			for(Value value : Value.values()) {
 				for(int count = 4; count >= 4; count--) {
 					Card card = new Card(color, value);
-					card.createID();
 					cardSet.add(card);
 				}
 			}

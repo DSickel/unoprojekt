@@ -17,18 +17,21 @@ public class Card {
 		ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, EXPOSE, CD, DRAWTWO;
 	}
 	
-	private int iD;
+	private Integer colorID;
+	private Integer valueID;
+	
 	private Color color;
 	private Value value;
+	private Integer iD;
 	
-	public Card() {
-		//Default Konstruktor tut nichts
+	public Card(Integer iD) {
+		this.iD = iD;
 	}
 	
 	public Card(Color color, Value value) {
 		this.color = color;
 		this.value = value;
-		this.iD = value.ordinal() + color.ordinal();
+		this.iD = createColorID() + createValueID();
 	}
 
 	public Color getColor() {
@@ -47,92 +50,100 @@ public class Card {
 		this.value = value;
 	}
 	
-	public int getID() {
+	public Integer getID() {
 		return iD;
 	}
 	
+	
+	public void setID(Integer iD) {
+		this.iD = iD;
+	}
 	/**
-	 * Erstellt eine eindeutige ID 
-	 * Grün von  0 - 11
-	 * Blau von 20 - 31
-	 * Gelb von	40 - 51
-	 * Rot  von 60 - 71
+	 * Erstellt eine eindeutige FarbID 
+	 * Blau => 20
+	 * Rot  => 21
+	 * Grün => 22
+	 * Gelb => 23
 	 */
-	public void createID(){
-		int a = 0;
-		int b = 0;
+	public int createColorID(){
+		int colorID = 0;
 		
 		//Farbüberprüfung
 		if (color == Color.BLUE) {
-			a = 20;
+			colorID = 0;
 		}
 
 		if (color == Color.RED) {
-			a = 60;
+			colorID = 15;
 		}
 
 		if (color == Color.GREEN) {
-			a = 0;
+			colorID = 30;
 		}
 
 		if (color == Color.YELLOW) {
-			a = 40;
+			colorID = 45;
 		}
+		return colorID;
+	}
+	
+	public int createValueID() {
+		int valueID = 0;
 		
 		//Werteberprüfung
 		if (value == Value.ONE) {
-			b = 1;
+			valueID = 1;
 		}
 		
 		if (value == Value.TWO) {
-			b = 2;
+			valueID = 2;
 		}
 		
 		if (value == Value.THREE) {
-			b = 3;
+			valueID = 3;
 		}
 		
 		if (value == Value.FOUR) {
-			b = 4;
+			valueID = 4;
 		}
 		
 		if (value == Value.FIVE) {
-			b = 5;
+			valueID = 5;
 		}
 		
 		if (value == Value.SIX) {
-			b = 6;
+			valueID = 6;
 		}
 		
 		if (value == Value.SEVEN) {
-			b = 7;
+			valueID = 7;
 		}
 		
 		if (value == Value.EIGHT) {
-			b = 8;
+			valueID = 8;
 		}
 		
 		if (value == Value.NINE) {
-			b = 9;
+			valueID = 9;
 		}
 		
 		if (value == Value.ZERO) {
-			b = 0;
+			valueID = 0;
 		}
 		
 		if (value == Value.CD) {
-			b = 10;
+			valueID = 10;
 		}
 		
 		if (value == Value.DRAWTWO) {
-			b = 11;
+			valueID = 11;
 		}
 		
 		if (value == Value.EXPOSE) {
-			b = 12;
+			valueID = 12;
 		}
 		
-		this.iD = a + b;
+		return valueID;
 	}
 		
 	
