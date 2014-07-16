@@ -59,6 +59,10 @@ public class Game implements IObserverable{
 	public Collection<Player> getPlayers() {
 		return players;
 	}
+	
+	public Player getPlayer(int index) {
+		return players.get(index);
+	}
 
 	public void setPlayers(ArrayList<Player> players) {
 		this.players = players;

@@ -16,6 +16,7 @@ import play.libs.F.Callback0;
 import play.mvc.*;
 import util.IObserver;
 import views.html.*;
+import model.Card;
 import model.Game;
 import model.GameController;
 import model.Player;
@@ -153,14 +154,57 @@ public class Application extends Controller implements IObserver{
     	}
     	Integer gameID = Integer.parseInt(session("gameID"));
     	Game game = gameController.getGame(gameID);
+    	String player1 = game.getPlayer(0).getPlayerName();
+    	String player2 = game.getPlayer(1).getPlayerName();
     	game.startGame();
     	System.out.println("DEBUG: Spiel welches gestartet werden soll: " + gameID );
     	
-    	return ok(spielfeld.render(username));
+    	return ok(spielfeld.render(player1, player2, username));
     }
     
+    public static Result loadCardPlayerTwo() {
+    	System.out.println("LOAD GAME WIRD AUFGERUFEN!");
+    	GameController gameController = GameController.getInstance();
+    	if(session("gameID") == null){
+    		return redirect("/startseite");
+    	}
+    	Integer gameID = Integer.parseInt(session("gameID"));
+    	System.out.println(gameID);
+    	Game game = gameController.getGame(gameID);
+    	String result = "[";
+    	/*for(Card card : game.getPlayer(0).getHandCards()){
+            result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + ", \"value\" : " + "\"" + card.getValue() + "\"" +"},";
+          }*/
+    	for(Card card : game.getPlayer(1).getHandCards()){
+    		result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + "\""+ "},";
+    	}
+    	result = result.substring(0, result.length() - 1) + "]";
+    	System.out.println(result);
+    	
+    	return ok(result);
+    }
     
-    
+    public static Result loadCardPlayerOne() {
+    	System.out.println("LOAD GAME WIRD AUFGERUFEN!");
+    	GameController gameController = GameController.getInstance();
+    	if(session("gameID") == null){
+    		return redirect("/startseite");
+    	}
+    	Integer gameID = Integer.parseInt(session("gameID"));
+    	System.out.println(gameID);
+    	Game game = gameController.getGame(gameID);
+    	String result = "[";
+    	/*for(Card card : game.getPlayer(0).getHandCards()){
+            result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + ", \"value\" : " + "\"" + card.getValue() + "\"" +"},";
+          }*/
+    	for(Card card : game.getPlayer(0).getHandCards()){
+    		result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + "\""+ "},";
+    	}
+    	result = result.substring(0, result.length() - 1) + "]";
+    	System.out.println(result);
+    	
+    	return ok(result);
+    }
     
     public static WebSocket<JsonNode> gameWebSocket() {
     	final String user = session("User1");
@@ -187,7 +231,9 @@ public class Application extends Controller implements IObserver{
     						System.out.println("ERREICHT CARDEVENT BEFEHLE");
     						System.out.println("Card ID ist: " + cardId);
     						System.out.println("GAMETEST: " +game.getGameID() + ", " +game.getGameName());
+    						//Spielt die Karte
     						game.play(game.getCurrentPlayer(), cardId);
+    						
     						System.out.println("NACH GAME.PLAY");
     						ObjectNode node = Json.newObject();
     						//Erster NODE Test
@@ -202,6 +248,9 @@ public class Application extends Controller implements IObserver{
     						//Vierter NODE Test
     						System.out.println("4.JSON Test: " + node.asText());
     						node.put("text", "macht seinen Zug..");
+    						
+    						//Nächster Spieler an der Reihe
+    						game.nextPlayer();
     						
     						/*System.out.println("JSON das zu versenden ist: " + node.asText());
     						for(WebSocket.Out<JsonNode> out : gameConnections.values()) {
@@ -223,6 +272,24 @@ public class Application extends Controller implements IObserver{
     							out.write(event);
     						}
     					}
+    					
+    					/*if(action.equals("loadGame")) {
+    						System.out.println("ERREICHT LOADGAME BEFEHLE");
+    						ObjectNode node = Json.newObject();
+    						node.put("type", "loadGame");
+    						ArrayNode player1 = node.putArray("player1");
+    						for(Card card : game.getPlayer(0).getHandCards()) {
+    							player1.add(card.getID());
+    						}
+    						ArrayNode player2 = node.putArray("player2");
+    						for(Card card : game.getPlayer(1).getHandCards()) {
+    							player2.add(card.getID());
+    						}
+    						
+    						for(WebSocket.Out<JsonNode> out : connection) {
+    							out.write(node);
+    						}
+    					}*/
     					
     					
     				}

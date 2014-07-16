@@ -20,6 +20,8 @@ GET		/spielBeitreten				controllers.Application.beitreten(username, gameID)
 GET		/refresh				 	controllers.Application.refresh()
 GET		/spiel						controllers.Application.starten()
 GET		/warteLobby					controllers.Application.warteLobby()
+GET		/loadCardPlayerOne			controllers.Application.loadCardPlayerOne()
+GET		/loadCardPlayerTwo			controllers.Application.loadCardPlayerTwo()
 
 #WebSocket
 GET		/chat						controllers.Application.testChat()
