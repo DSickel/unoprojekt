@@ -24,6 +24,10 @@ public class Card {
 	private Value value;
 	private Integer iD;
 	
+	public Card(){
+		
+	}
+	
 	public Card(Integer iD) {
 		this.iD = iD;
 	}
@@ -31,6 +35,8 @@ public class Card {
 	public Card(Color color, Value value) {
 		this.color = color;
 		this.value = value;
+		this.colorID = createColorID();
+		this.valueID = createValueID();
 		this.iD = createColorID() + createValueID();
 	}
 
@@ -54,16 +60,37 @@ public class Card {
 		return iD;
 	}
 	
-	
-	public void setID(Integer iD) {
+	public Integer getColorID() {
+		return colorID;
+	}
+
+	public void setColorID(Integer colorID) {
+		this.colorID = colorID;
+	}
+
+	public Integer getValueID() {
+		return valueID;
+	}
+
+	public void setValueID(Integer valueID) {
+		this.valueID = valueID;
+	}
+
+	public Integer getiD() {
+		return iD;
+	}
+
+	public void setiD(Integer iD) {
 		this.iD = iD;
 	}
+
+
 	/**
 	 * Erstellt eine eindeutige FarbID 
-	 * Blau => 20
-	 * Rot  => 21
-	 * Grün => 22
-	 * Gelb => 23
+	 * Blau => 0
+	 * Rot  => 15
+	 * Grün => 30
+	 * Gelb => 45
 	 */
 	public int createColorID(){
 		int colorID = 0;
@@ -147,12 +174,22 @@ public class Card {
 	}
 		
 	
-	public boolean playable(Card tableCard) {
-		if(tableCard.value.equals(value) || tableCard.color.equals(color)){
+	public boolean playable(Card trayCard) {
+		if(trayCard.getColorID() == this.colorID) {
+			return true;
+		}
+		if((trayCard.getID() - trayCard.getColorID()) == this.valueID) {
 			return true;
 		}
 		return false;
 	}
+	
+	/*public boolean playable(Card tableCard) {
+		if(tableCard.value.equals(value) || tableCard.color.equals(color)){
+			return true;
+		}
+		return false;
+	}*/
 	
 	public void playEffect(Game game) {
 		//Default: No effect

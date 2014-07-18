@@ -87,12 +87,14 @@ public class Application extends Controller implements IObserver{
     public static Result spiel_erstellen() {
     	String username = session("User1");
     	GameController gameController = GameController.getInstance();
-    	int gameID = gameController.addGame(username);
+    	int gameID = gameController.addGame(username); //Observer übergeben
     	Game game = gameController.getGame(gameID);
-    	Player player = new Player(username);
+    	Player player = new Player(username, game.getPlayers().size());
+    	System.out.println("GEADDETER SPIELER: " + player.getPlayerName() + " mit der ID: " + player.getiD());
     	game.addPlayer(player);
     	System.out.println("Game: " + game.getGameName() + " ID " + game.getGameID() + " #Spieler " + game.getCurrentNumberOfPlayers());
     	
+    	session("ID", Integer.toString(player.getiD()));
     	session("gameID", Integer.toString(gameID));
     	session("host", "true");
     	
@@ -131,15 +133,18 @@ public class Application extends Controller implements IObserver{
     public static Result beitreten(String username, String gameID) {
     	GameController gameController = GameController.getInstance();
     	Game game = gameController.getGame(Integer.parseInt(gameID));
-    	Player player = new Player(username);
+    	Player player = new Player(username, game.getPlayers().size());
     	game.addPlayer(player);
     	
+    	System.out.println("--------------- beitreten -------------------");
     	System.out.println("DEBUG AUSGABE: Spieleranzahl " + game.getCurrentNumberOfPlayers());
-    	System.out.println("GEADDETER SPIELER: " + player.getPlayerName());
+    	System.out.println("GEADDETER SPIELER: " + player.getPlayerName() + " mit der ID: " + player.getiD());
     	System.out.println("GAME ID: " + Integer.parseInt(gameID));
     	System.out.println("SPIELER IM SPIEL: " + game.getPlayers());
     	System.out.println("LAUFENDE SPIELE: " + gameController.getAvailableGames().toString());
+    	System.out.println("=============================================");
     	
+    	session("ID", Integer.toString(player.getiD()));
     	session("gameID", gameID);
     	session("host", "false");
     	
@@ -148,6 +153,7 @@ public class Application extends Controller implements IObserver{
    
     public static Result starten() {
     	String username = session("User1");
+    	String userID = session("ID");
     	GameController gameController = GameController.getInstance();
     	if(session("gameID") == null){
     		return redirect("/startseite");
@@ -156,10 +162,21 @@ public class Application extends Controller implements IObserver{
     	Game game = gameController.getGame(gameID);
     	String player1 = game.getPlayer(0).getPlayerName();
     	String player2 = game.getPlayer(1).getPlayerName();
-    	game.startGame();
+    	
+    	//Überprüfen ob Spieler 1 schon Karten auf der Hand hat, wenn ja muss das Spiel nicht mehr gestartet werden!
+    	if(game.getPlayer(0).getHandCards().isEmpty()){
+    		game.startGame();
+    	}
+    	
     	System.out.println("DEBUG: Spiel welches gestartet werden soll: " + gameID );
     	
-    	return ok(spielfeld.render(player1, player2, username));
+    	String player = session("host");
+    	System.out.println("HOST: " + player);
+    	if(player.equals("false")) {
+    		return ok(spielfeld2.render(player1, player2, username, userID));
+    	}
+    	
+    	return ok(spielfeld.render(player1, player2, username, userID));
     }
     
     public static Result loadCardPlayerTwo() {
@@ -179,7 +196,9 @@ public class Application extends Controller implements IObserver{
     		result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + "\""+ "},";
     	}
     	result = result.substring(0, result.length() - 1) + "]";
+    	System.out.println("--- Load Player Two ------");
     	System.out.println(result);
+    	System.out.println("==========================");
     	
     	return ok(result);
     }
@@ -201,8 +220,26 @@ public class Application extends Controller implements IObserver{
     		result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + "\""+ "},";
     	}
     	result = result.substring(0, result.length() - 1) + "]";
+    	System.out.println("--- Load Player One ------");
     	System.out.println(result);
+    	System.out.println("==========================");
     	
+    	return ok(result);
+    }
+    
+    public static Result loadTrayCard() {
+    	System.out.println("LOAD TRAYCARD WIRD AUFGERUFEN!");
+    	GameController gameController = GameController.getInstance();
+    	if(session("gameID") == null){
+    		return redirect("/startseite");
+    	}
+    	Integer gameID = Integer.parseInt(session("gameID"));
+    	System.out.println(gameID);
+    	Game game = gameController.getGame(gameID);
+    	String result = "{\"cardID\" : " + game.getCardTray().getID() + ", \"color\" : " + "\"" + game.getCardTray().getColor() + "\""+ "}";
+    	
+    	System.out.println(result);
+    	System.out.println("=========================");
     	return ok(result);
     }
     
@@ -227,30 +264,39 @@ public class Application extends Controller implements IObserver{
     					//Wird aufgerufen wenn eine Karte gespielt wird
     					if(action.equals("cardEvent")){
     						Integer cardId = event.get("card").asInt();
-    						
+    						System.out.println("------ cardEvent ---------");
     						System.out.println("ERREICHT CARDEVENT BEFEHLE");
     						System.out.println("Card ID ist: " + cardId);
     						System.out.println("GAMETEST: " +game.getGameID() + ", " +game.getGameName());
-    						//Spielt die Karte
-    						game.play(game.getCurrentPlayer(), cardId);
-    						
-    						System.out.println("NACH GAME.PLAY");
     						ObjectNode node = Json.newObject();
-    						//Erster NODE Test
-    						System.out.println("1.JSON Test: " + node.asText());
-    						node.put("type", "cardEvent");
-    						//Zweiter NODE Test
-    						System.out.println("2.JSON Test: " + node.asText());
-    						node.put("user", game.getCurrentPlayer().getPlayerName());
-    						//Dritter NODE Test
-    						System.out.println("3.JSON Test: " + node.fields().toString());
-    						node.put("card", cardId);
-    						//Vierter NODE Test
-    						System.out.println("4.JSON Test: " + node.asText());
-    						node.put("text", "macht seinen Zug..");
+    						//Spielt die Karte
+    						if(game.play(game.getCurrentPlayer(), cardId) == true) {
     						
-    						//Nächster Spieler an der Reihe
-    						game.nextPlayer();
+    							System.out.println("Game.play == TRUE");
+    							node.put("type", "cardEvent");
+    							//Zweiter NODE Test
+    							System.out.println("2.JSON Test: " + node.asText());
+    							node.put("userName", game.getCurrentPlayer().getPlayerName());
+    							//Dritter NODE Test
+    							node.put("userID", game.getCurrentPlayer().getiD());
+    							System.out.println("3.JSON Test: " + game.getCurrentPlayer().getPlayerName() + " ist am Zug");
+    							node.put("card", cardId);
+    							//Vierter NODE Test
+    							node.put("trayCard", game.getCardTray().getID());
+    							System.out.println("4.JSON Test: KartenID " + game.getCardTray().getID() + " auf dem Kartenstapel");
+    							node.put("text", "macht seinen Zug..");
+    							
+    							//Nächster Spieler an der Reihe
+    							game.nextPlayer();
+    							System.out.println("=====================");
+    						}else {
+    							String userID = Integer.toString(game.getCurrentPlayer().getiD());
+    							System.out.println("Game.play == FALSE");
+    							node.put("type", "unplayable");
+    							node.put("userName", game.getCurrentPlayer().getPlayerName());
+    							node.put("userID", userID);
+    							node.put("card", cardId);
+    						}
     						
     						/*System.out.println("JSON das zu versenden ist: " + node.asText());
     						for(WebSocket.Out<JsonNode> out : gameConnections.values()) {
@@ -259,6 +305,11 @@ public class Application extends Controller implements IObserver{
     						for(WebSocket.Out<JsonNode> out : connection) {
     							out.write(node);
     						}
+    					}
+    					
+    					if(action.equals("draw")) {
+    						System.out.println("ERREICHT DRAW BEFEHLE");
+    						game.draw(game.getCurrentPlayer(), 1);
     					}
     					
     					//Wird aufgerufen wenn eine Chatnachricht verschickt wird

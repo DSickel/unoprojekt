@@ -80,6 +80,10 @@ public class Game implements IObserverable{
 		return numberOfPlayers;
 	}
 	
+	public Card getCardTray() {
+		return cardTray.get(cardTray.size()-1);
+	}
+	
 	public void addPlayer(Player player){
 		this.numberOfPlayers = numberOfPlayers + 1;
 		players.add(player);
@@ -136,17 +140,25 @@ public class Game implements IObserverable{
 		}
 	}
 
-	public void play(Player player, int cardID) {
-		Card card = player.playCard(cardID, cardTray.get(0));
+	public boolean play(Player player, int cardID) {
+		Card card = player.playCard(cardID, cardTray.get(cardTray.size()-1));
+		System.out.println("Kartenstapel vor Spielzug: ColorID: " + cardTray.get(cardTray.size()-1).getColorID() + " ValueID: " + cardTray.get(cardTray.size()-1).getValueID());
 		if(card != null) {
+			System.out.println("KatenID: " + card.getiD());
+			System.out.println("Karte kann gespielt werden!");
 			cardTray.add(card);
+			System.out.println("Kartenstapel nach Spielzug: ColorID: " + cardTray.get(cardTray.size()-1).getColorID() + " ValueID: " + cardTray.get(cardTray.size()-1).getValueID());
+			return true;
+		}else{
+			System.out.println("Karte nicht spielbar!");
+			return false;
 		}
-		System.out.println("Karte nicht spielbar!");
+		
 	}
 	
-	public void startGame(/*ArrayList<Player> players*/) {
+	public void startGame() {
 		//Ermittelt Startspieler
-		this.currentPlayer = (int) (Math.random()) * players.size() + 1;
+		this.currentPlayer = /*(int) (Math.random()) * players.size() + 1*/ 0;
 		this.currentDirection = 1;
 		this.numberOfPlayers = numberOfPlayers;
 		this.cardSet = new ArrayList<Card>();
