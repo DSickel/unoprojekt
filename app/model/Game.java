@@ -105,9 +105,11 @@ public class Game implements IObserverable{
 		}
 	}
 	
-	public void finished() {
-		this.finished = true;
-		notifyObservers();
+	public boolean finished() {
+		if(players.get(currentPlayer).getHandCards().isEmpty()){
+			return true;
+		}
+		return false;
 	}
 	
 	/**Game Handling*/
@@ -158,7 +160,7 @@ public class Game implements IObserverable{
 	
 	public void startGame() {
 		//Ermittelt Startspieler
-		this.currentPlayer = /*(int) (Math.random()) * players.size() + 1*/ 0;
+		this.currentPlayer = (int)(Math.random()*players.size());
 		this.currentDirection = 1;
 		this.numberOfPlayers = numberOfPlayers;
 		this.cardSet = new ArrayList<Card>();
