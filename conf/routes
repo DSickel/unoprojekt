@@ -21,7 +21,6 @@ GET		/refresh				 	controllers.Application.refresh()
 GET		/spiel						controllers.Application.starten()
 GET		/warteLobby					controllers.Application.warteLobby()
 GET		/loadCardPlayerOne			controllers.Application.loadCardPlayerOne(user)
-#GET		/loadCardPlayerTwo			controllers.Application.loadCardPlayerTwo()
 GET		/loadTrayCard				controllers.Application.loadTrayCard()
 
 
