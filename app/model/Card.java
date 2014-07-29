@@ -192,7 +192,33 @@ public class Card {
 	}*/
 	
 	public void playEffect(Game game) {
-		//Default: No effect
+		System.out.println("PLAY EFFEKT");
+		String value =  getValueID().toString();
+		System.out.println("WERT: " + value);
+		switch(value) {
+			case "12": 
+				game.nextPlayer();
+				System.out.println("ERREICHT EXPOSE EFFEKT");
+				break;
+				
+			case "10": 
+				if(game.getDirection() > 0) {
+					game.setDirection(-1);
+				}
+				game.setDirection(1);
+				System.out.println("ERREICHT CD EFFEKT");
+				break;
+				
+			case "11":
+				game.draw(game.getCurrentPlayer(), 2);
+				System.out.println("PLUS 2 EFFEKT WIRD AUFGERUFEN");
+				break;
+				
+			default:
+				System.out.println("KEIN EFFEKT");
+				
+		}
+		
 	}
 	
 	

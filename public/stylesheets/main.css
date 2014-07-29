@@ -1,1 +1,170 @@
+/* ALLGEMEIN 
+---------------------------------- */
+
+*{
+	margin: 0;
+	padding: 0;
+}
+
+html, body {
+	height: 100%;
+	background-color: white;
+}
+
+body {
+	font-family: comic sans MS; 
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 0;
+	padding: 0;
+}
+
+h1 {
+	font-size: 48px;
+}
+
+h2 {
+	font-size: 34px;
+}
+
+h3 {
+	font-size: 20px;
+}
+
+.logo {
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+
+
+/* HEADER UND FOOTER  
+---------------------------------- */
+
+#header{
+	position: relative;
+	top: 0;
+	margin-bottom: 5px;
+	padding: 15px;
+	background-color: #87CEFA;
+	text-align: center;
+}
+
+#footer{
+	position: relative;
+	bottom: 0;
+	margin-top: 5px;
+	padding: 15px;
+	padding-left: 20px;
+    background-color: #87CEFA;
+   	clear: left;
+   	text-align: center;
+}
+
+/* INDEX 
+---------------------------------- */
+
+.indexContent {
+	margin-top: 20%;
+	text-align: center;
+}
+
+/* LOGIN 
+---------------------------------- */
+
+.loginContent {
+	margin-top: 15%;
+	padding-left: 50px;
+	float: left;
+	margin-bot: 2%;
+}
+
+.log {
+	margin-top: 10px;
+}
+
+.parameter {
+	margin-right: 0px;
+}
+
+#loginForm {
+	padding-left: 25%;
+}
+
+
+/* STARTSEITE 
+---------------------------------- */
+
+.start {
+	position: relative;
+	margin-top: 5px;
+}
+
+.startContent {
+	margin-top: 10%;
+	padding-left: 50px;
+	float: left;
+	text-align: center;
+	margin-bot: 2%;
+}
+
+/* REGELWERK 
+---------------------------------- */
+
+.regel {
+	position: relative;
+	margin-top: 5px;
+}
+
+.regelContent {
+	float: left;
+	padding-left:50px;
+	margin-bot: 2%;
+}
+
+.listElement {
+	padding: 15px;
+	margin: 10px;
+}
+
+
+/* FARBEN 
+---------------------------------- */
+
+.redText {
+	color: #CD0000;
+}
+
+.greenText {
+	color: #32CD32;
+}
+
+.yellowText {
+	color: #FFB90F;
+}
+
+.blueText {
+	color: #0000FF;
+}
+
+.startCenter {
+	text-align: center;
+	margin: 15px;
+}
+
+#unologo {
+	background: url(/assets/images/unologo.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+  	/*padding: 5px;
+  	margin: 15px;*/
+}
+
+.buttons{
+	margin: 10px;
+	padding: 10px;
+}
+
 

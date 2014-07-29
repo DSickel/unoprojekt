@@ -1,5 +1,5 @@
 @javaScript = {
-<<script type="text/javascript">
+<script type="text/javascript">
 <!--
 
 //-->
@@ -7,14 +7,30 @@
 }
 
 @main("Welcome to Play")(javaScript) {
-
-   <header>
-		<h1>Willkommen bei</h1>
-		<div id="titelbild" src="URL für UNO-Bild"></div>
-		<h1>Online</h1>
-		<h3>Ein Projekt von B.Pllana, D.Sickel und V.Weirich</h3>
+	<header class="col-md-12" id="header">
+			<a class="btn btn-link" href="@routes.Application.impressum()">Impressum</a>
 	</header>
-	<h2>
-		<a href="@routes.Application.login()">Zum Login</a>
-	</h2>
+   	<div class="col-md-12 start">
+		<section class="col-md-6 logo">
+			<h1 class="startCenter"><span class="blueText">Will</span><span class="greenText">kom</span><span class="redText">men</span> <span class="yellowText">bei</span></h1>
+			<div id="unologo">
+				<br></br>
+				<br></br>
+				<br></br>
+				<h1>UNO</h1>
+				<h1>UNO</h1>
+				<br></br>
+				<br></br>
+				<br></br>
+			</div>
+			<h1 class="startCenter"><span class="greenText">On</span><span class="yellowText">li</span><span class="redText">ne</span></h1>
+			<h3 class="startCenter">Ein Projekt von <del>B.Pllana,</del> D.Sickel <del>und V.Weirich</del></h3>
+		</section>
+		<section class="col-md-6 indexContent">
+			<a class="btn btn-link" href="@routes.Application.login()"><h2>Zum Login</h2></a>
+		</section>
+	</div>
+	<footer class="col-md-12" id="footer">
+		<p> &COPY; 2014 | Dominic Sickel &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Projekt für Web-Technologien von der HTWG-Konstanz</p>
+	</footer>
 }

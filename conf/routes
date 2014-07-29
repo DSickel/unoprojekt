@@ -2,7 +2,7 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
+#Index
 GET     /                           controllers.Application.index()
 
 #Login
@@ -10,19 +10,25 @@ GET		/login						controllers.Application.login()
 POST	/startseite					controllers.Application.startseite()
 GET 	/startseite					controllers.Application.startseiteGet()
 
-#GetStarted
-GET		/regelwerk					controllers.GetStarted.regelwerk()
+#Regeln
+GET		/regelwerk					controllers.Application.regelwerk()
 
-#UnoGame
+#Impressum
+GET		/impressum					controllers.Application.impressum()
+
+#Spiel erstellen/beitreten
 GET		/spielErstellen				controllers.Application.spiel_erstellen()
 GET		/spielliste					controllers.Application.spielliste()
 GET		/spielBeitreten				controllers.Application.beitreten(username, gameID)
 GET		/refresh				 	controllers.Application.refresh()
-GET		/spiel						controllers.Application.starten()
 GET		/warteLobby					controllers.Application.warteLobby()
+GET		/refreshSpieler				controllers.Application.refreshSpieler()
+
+#Spielen
 GET		/loadCardPlayerOne			controllers.Application.loadCardPlayerOne(user)
 GET		/loadTrayCard				controllers.Application.loadTrayCard()
-
+GET		/spiel						controllers.Application.starten()
+GET		/createGameWebSocket		controllers.Application.wsToInformAboutSecondPlayer()
 
 #WebSocket
 GET		/chat						controllers.Application.testChat()

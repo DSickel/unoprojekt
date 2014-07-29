@@ -31,8 +31,11 @@ public class Application extends Controller implements IObserver{
 	//Liste um alle Websocket Connections zu speichern
 	private static HashMap<Integer, WebSocket.Out<JsonNode>> gameConnections = new HashMap<Integer, WebSocket.Out<JsonNode>>();
 	
+	//Liste der Websocket Teilnehmer für das Spiel
 	private static List<WebSocket.Out<JsonNode>> connection = new ArrayList<WebSocket.Out<JsonNode>>();
 	
+	//Liste der WebSocketTeilnehmer für die Wartelobby
+	private static List<WebSocket.Out<JsonNode>> lobbyConnection = new ArrayList<WebSocket.Out<JsonNode>>(); 
 
 	
 	
@@ -43,20 +46,21 @@ public class Application extends Controller implements IObserver{
    
     //Rendert die Login Seite
     public static Result login() {
-    	Form<User> userForm = loginForm.fill(new User("Max Mustermann"));
+    	session().clear();
+    	Form<User> userForm = Form.form(User.class);
     	return ok(login.render(userForm));
     }
     
     //Rendert die Startseite (POST)
     public static Result startseite() {
-    	Form<User> userForm = loginForm.bindFromRequest();
-    	
+    	Form<User> userForm = Form.form(User.class).bindFromRequest();
     	if(userForm.hasErrors()){
+    		System.out.println("Errors gefunden!");
     		return badRequest(login.render(userForm));
     	}else{
     		User user = userForm.get();
     		session().clear();
-    		session("User1", user.username);
+    		session("User1", user.userName);
     		return ok(startseite.render(user));
     	}
     }
@@ -70,8 +74,21 @@ public class Application extends Controller implements IObserver{
     		return redirect("/login");
     	}
     }
-    //bis hierhin alles fertig
+   
     
+    //Rendert die Regelwerkseite
+    public static Result regelwerk() {
+    	String username = session("User1");
+    	if(username != null){
+    		return ok(regelwerk.render());
+    	}else{
+    		return redirect("/login");
+    	}
+	}
+    
+    public static Result impressum() {
+    	return TODO;
+    }
     
     //Rendert den ChatRoom
     public static Result testChat(){
@@ -79,10 +96,7 @@ public class Application extends Controller implements IObserver{
     	
     	return ok(ChatRoom.render(username));
     }
-    //bis hierhin fertig
-    
-    
-    
+   
     //Erstellt ein Spiel - FERTIG!
     public static Result spiel_erstellen() {
     	String username = session("User1");
@@ -103,13 +117,23 @@ public class Application extends Controller implements IObserver{
     
     public static Result warteLobby() {
     	String username = session("User1");
-    	return ok(wartelobby.render(username));
+    	if(username != null) {
+    		return ok(wartelobby.render(username));
+    	}else{
+    		return redirect("/login");
+    	}
     }
+    
+   
     
   	//Rendert Spiel-beitreten Seite
     public static Result spielliste() {
     	String username = session("User1");
-    	return ok(spielliste.render(username));
+    	if(username != null) {
+    		return ok(spielliste.render(username));
+    	}else{
+    		return redirect("/login");
+    	}
     }
     
     //Aktualisiert die Liste der Spiele - FERTIG!
@@ -129,6 +153,22 @@ public class Application extends Controller implements IObserver{
         System.out.println(result);
     	return ok(result);
   	}
+    
+    public static Result refreshSpieler() {
+    	System.out.println("REFRESH SPIELER WIERD AUFGERUFEN!");
+    	GameController gameController = GameController.getInstance();
+    	Game game = gameController.getGame(Integer.parseInt(session("gameID")));
+    	
+    	String result = "[";
+    	
+    	for(Player player : game.getPlayers()){
+    		result += "{\"playerID\" : " + player.getiD() + ", \"playerName\" : " + "\"" + player.getPlayerName() + "\""+ "},";
+    	}
+    	
+    	result = result.substring(0, result.length() - 1) + "]";
+        System.out.println(result);
+    	return ok(result);
+    }
     
     public static Result beitreten(String username, String gameID) {
     	GameController gameController = GameController.getInstance();
@@ -155,54 +195,35 @@ public class Application extends Controller implements IObserver{
     	String username = session("User1");
     	String userID = session("ID");
     	String player = session("host");
-    	
-    	GameController gameController = GameController.getInstance();
-    	if(session("gameID") == null){
-    		return redirect("/startseite");
+    	if(username != null) {
+	    	GameController gameController = GameController.getInstance();
+	    	if(session("gameID") == null){
+	    		return redirect("/startseite");
+	    	}
+	    	Integer gameID = Integer.parseInt(session("gameID"));
+	    	Game game = gameController.getGame(gameID);
+	    	String player1 = game.getPlayer(0).getPlayerName();
+	    	String player2 = game.getPlayer(1).getPlayerName();
+	    	
+	    	//Überprüfen ob Spieler 1 schon Karten auf der Hand hat, wenn ja muss das Spiel nicht mehr gestartet werden!
+	    	if(game.getPlayer(0).getHandCards().isEmpty()){
+	    		game.startGame();
+	    	}
+	  
+	    	
+	    	System.out.println("DEBUG: Spiel welches gestartet werden soll: " + gameID );
+	    	System.out.println("HOST: " + player);
+	    	
+	    	if(player.equals("false")) {
+	    		return ok(spielfeld2.render(player1, player2, username, userID));
+	    	}
+	    	
+	    	return ok(spielfeld.render(player1, player2, username, userID));
+    	}else{
+    		return redirect("/login");
     	}
-    	Integer gameID = Integer.parseInt(session("gameID"));
-    	Game game = gameController.getGame(gameID);
-    	String player1 = game.getPlayer(0).getPlayerName();
-    	String player2 = game.getPlayer(1).getPlayerName();
-    	
-    	//Überprüfen ob Spieler 1 schon Karten auf der Hand hat, wenn ja muss das Spiel nicht mehr gestartet werden!
-    	if(game.getPlayer(0).getHandCards().isEmpty()){
-    		game.startGame();
-    	}
-    	
-    	System.out.println("DEBUG: Spiel welches gestartet werden soll: " + gameID );
-    	System.out.println("HOST: " + player);
-    	
-    	if(player.equals("false")) {
-    		return ok(spielfeld2.render(player1, player2, username, userID));
-    	}
-    	
-    	return ok(spielfeld.render(player1, player2, username, userID));
     }
     
-   /* public static Result loadCardPlayerTwo() {
-    	System.out.println("LOAD GAME WIRD AUFGERUFEN!");
-    	GameController gameController = GameController.getInstance();
-    	if(session("gameID") == null){
-    		return redirect("/startseite");
-    	}
-    	Integer gameID = Integer.parseInt(session("gameID"));
-    	System.out.println(gameID);
-    	Game game = gameController.getGame(gameID);
-    	String result = "[";
-    	/*for(Card card : game.getPlayer(0).getHandCards()){
-            result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + ", \"value\" : " + "\"" + card.getValue() + "\"" +"},";
-          }*/
-    	/*for(Card card : game.getPlayer(1).getHandCards()){
-    		result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getValue() + "\""+ "},";
-    	}
-    	result = result.substring(0, result.length() - 1) + "]";
-    	System.out.println("--- Load Player Two ------");
-    	System.out.println(result);
-    	System.out.println("==========================");
-    	
-    	return ok(result);
-    }*/
     
     public static Result loadCardPlayerOne(String user) {
     	System.out.println("LOAD GAME WIRD AUFGERUFEN!");
@@ -219,7 +240,7 @@ public class Application extends Controller implements IObserver{
             result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getColor() + ", \"value\" : " + "\"" + card.getValue() + "\"" +"},";
           }*/
     	for(Card card : game.getPlayer(userID).getHandCards()){
-    		result += "{\"cardID\" : " + card.getID() + ", \"color\" : " + "\"" + card.getValue() + "\""+ "},";
+    		result += "{\"cardID\" : " + card.getID() + ", \"currentPlayer\" : " + "\"" + game.getCurrentPlayer().getiD() + "\""+ "},";
     	}
     	result = result.substring(0, result.length() - 1) + "]";
     	System.out.println("--- Load Player One ------");
@@ -241,7 +262,7 @@ public class Application extends Controller implements IObserver{
     	Integer gameID = Integer.parseInt(session("gameID"));
     	System.out.println(gameID);
     	Game game = gameController.getGame(gameID);
-    	String result = "{\"cardID\" : " + game.getCardTray().getID() + ", \"color\" : " + "\"" + game.getCardTray().getValue() + "\""+ "}";
+    	String result = "{\"cardID\" : " + game.getCardTray().getID() + ", \"currentPlayer\" : " + "\"" + game.getCurrentPlayer().getiD() + "\""+ "}";
     	
     	System.out.println(result);
     	System.out.println("=========================");
@@ -250,6 +271,7 @@ public class Application extends Controller implements IObserver{
     
     public static WebSocket<JsonNode> gameWebSocket() {
     	final String user = session("User1");
+    	System.out.println("User WEBSOCKET: "+ user);
     	final Integer gameID = new Integer(session("gameID"));
 		final boolean host = new Boolean(session("host"));
 		final GameController gameController = GameController.getInstance();
@@ -261,6 +283,13 @@ public class Application extends Controller implements IObserver{
     		public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
     			gameConnections.put(gameID, out);
     			connection.add(out);
+    			ObjectNode node = Json.newObject();
+                node.put("type", "start");
+                node.put("startPlayerName", game.getCurrentPlayer().getPlayerName());
+                node.put("startPlayerID", game.getCurrentPlayer().getiD());
+                for(WebSocket.Out<JsonNode> outs : connection) {
+						outs.write(node);
+				}
     			in.onMessage(new Callback<JsonNode>() {
     				public void invoke(JsonNode event) throws Throwable {
     					String action = event.get("type").asText();
@@ -282,13 +311,13 @@ public class Application extends Controller implements IObserver{
     							System.out.println("Game.play == TRUE");
     							String user = event.get("user").asText();
     							
-    							//Überprüfen ob Spieler noch Karten auf der Hand hat
+    							//Überprüfen ob Spiel fertig ist
     							if(game.finished()){
     								node.put("type", "finished");
     								node.put("userID", game.getCurrentPlayer().getiD());
     								node.put("userName", game.getCurrentPlayer().getPlayerName());
-    								
-    							}else{
+    							
+    							}else{//Spiel ist noch nicht fertig
     						
         							node.put("type", "cardEvent");
         							node.put("card", cardId);
@@ -297,7 +326,7 @@ public class Application extends Controller implements IObserver{
         							
         							//Nächster Spieler an der Reihe
         							game.nextPlayer();
-        							
+        							game.getCardTray().playEffect(game);
         							//Schreib ID und Name des nächsten Spielers in ein JSON
         							node.put("userID", game.getCurrentPlayer().getiD());
         							node.put("userName", game.getCurrentPlayer().getPlayerName());
@@ -356,6 +385,7 @@ public class Application extends Controller implements IObserver{
 						node.put("type", "close");
 						node.put("text", "has closed connection!");
 						node.put("user", user);
+						System.out.println("NODE USER CLOSE: " + user);
 						for(WebSocket.Out<JsonNode> out : connection) {
 							out.write(node);
 						}
@@ -366,7 +396,78 @@ public class Application extends Controller implements IObserver{
     	};
     }
     
-    
+    public static WebSocket<JsonNode> wsToInformAboutSecondPlayer(){
+    	final Integer gameID = new Integer(session("gameID")); //"cache" here so it's available within the onReady method.
+        final String user = new String(session("User1"));
+    	final GameController gameController = GameController.getInstance();
+		System.out.println("SpielID: " + gameID);
+		final Game game = gameController.getGame(gameID);
+		System.out.println("GameID: " + game.getGameID());
+        return new WebSocket<JsonNode>(){
+           
+            
+            // called when websocket handshake is done
+            public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out){
+            		//Add the user which created this websocket to the lists of hosts waiting
+                    lobbyConnection.add(out);
+                    System.out.println("NODE USER ONREADY: " + gameID +" "+user);
+                    ObjectNode node = Json.newObject();
+                    node.put("type", "join");
+                    node.put("user", user);
+                    for(WebSocket.Out<JsonNode> outs : lobbyConnection) {
+						outs.write(node);
+					}
+                    in.onMessage(new Callback<JsonNode>() {
+                    	
+                    	public void invoke(JsonNode event) throws Throwable {
+                    		String action = event.get("type").asText();
+        					System.out.println(action);
+        					ObjectNode node = Json.newObject();
+                    		if(action.equals("start")){
+                    			if(game.getCurrentNumberOfPlayers() != 2){
+                    				node.put("type", "notStart");
+                    			}else{
+                    				node.put("type", "start");
+                    				node.put("user", event.get("user"));
+                    				node.put("players", game.getCurrentNumberOfPlayers());
+                    			}
+                    		}
+                    		for(WebSocket.Out<JsonNode> out : lobbyConnection) {
+    							out.write(node);
+    						}
+                    	}
+                    });
+                    in.onClose(new Callback0() {
+
+						public void invoke() throws Throwable {
+							//GameController matchController = GameController.getInstance();
+							//Game match = matchController.getGame(gameID);
+							if (game.getCurrentNumberOfPlayers() == 1) {
+								
+						    	try {
+
+						    		if (game.getCurrentNumberOfPlayers() == 1) {
+						      			game.addPlayer(new Player("FILLER", -1));
+						    		}
+
+						    	} catch(NumberFormatException e){
+						    		//Match not there - we can ignore it
+						    	} catch (NullPointerException e){
+						    		//Match not there - we can ignore it
+						    	}
+							}else{
+								ObjectNode node = Json.newObject();
+								node.put("type", "close");
+								node.put("user", user);
+								for(WebSocket.Out<JsonNode> out : lobbyConnection) {
+	    							out.write(node);
+	    						}
+							}
+						}
+					});
+            }
+        };   
+    }
     
     //Interiert über alle Einträge in der Liste der WebSocket Verbindungen
 	public void update() {

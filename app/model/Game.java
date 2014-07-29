@@ -15,7 +15,7 @@ import model.Card.Value;
  * @author Dominic
  *
  */
-public class Game implements IObserverable{
+public class Game implements IObserverable {
 	private List<IObserver> observers;
 	
 	private String gameName;
@@ -87,6 +87,11 @@ public class Game implements IObserverable{
 	public void addPlayer(Player player){
 		this.numberOfPlayers = numberOfPlayers + 1;
 		players.add(player);
+	}
+	
+	public void removePlayer(int index){
+		this.numberOfPlayers = numberOfPlayers - 1;
+		players.remove(index);
 	}
 	
 	public int getDirection() {

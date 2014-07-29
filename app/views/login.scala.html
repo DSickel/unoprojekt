@@ -9,18 +9,67 @@
 //-->
 </script>
 }
-@main("Login")(javaScript) {
 
-	<header>
-		<h1>Willkommen bei</h1>
-		<div id="titelbild" src="URL für UNO-Bild"></div>
-		<h1>Online</h1>
-		<h3>Ein Projekt von B.Pllana, D.Sickel und V.Weirich</h3>
-	</header>
-	<h2>Login:</h2>
-	@helper.form(action = routes.Application.startseite(), 'id -> "loginForm") {
-		@helper.inputText(loginForm("username"))
-		<button type="submit">Login</button>
+@main("Login")(javaScript) {
+	<!--  <div class="container-fluid">
+		<header class="col-md-8">
+			<h1>Willkommen bei</h1>
+			<div id="titelbild" src="URL für UNO-Bild"></div>
+			<h1>Online</h1>
+			<h3>Ein Projekt von <del>B.Pllana,</del> D.Sickel <del>und V.Weirich</del></h3>
+		</header>
+		<div class="col-md-4 text-center">
+		<h2>Login:</h2>
+			@helper.form(action = routes.Application.startseite(), 'id -> "loginForm") {
+				@helper.inputText(loginForm("username"))
+				<button type="submit">Login</button>
+		</div>
+	</div>-->
+	
+		<header class="col-md-12" id="header">
+			<a class="btn btn-link" href="@routes.Application.regelwerk()">Impressum</a>
+		</header>
+		<div class="col-md-12 start">
+			<section class="col-md-6 logo">
+				<h1 class="startCenter"><span class="blueText">Will</span><span class="greenText">kom</span><span class="redText">men</span> <span class="yellowText">bei</span></h1>
+				<div id="unologo">
+					<br></br>
+					<br></br>
+					<br></br>
+					<h1>UNO</h1>
+					<h1>UNO</h1>
+					<br></br>
+					<br></br>
+					<br></br>
+				</div>
+				<h1 class="startCenter"><span class="greenText">On</span><span class="yellowText">li</span><span class="redText">ne</span></h1>
+				<h3 class="startCenter">Ein Projekt von <del>B.Pllana,</del> D.Sickel <del>und V.Weirich</del></h3>
+			</section>
+			<section class="col-md-6 loginContent">
+				<h2 class="redText startCenter">Login</h2>
+				<br>
+				@form(routes.Application.startseite(),'class -> "form-horizontal", 'id -> "loginForm") {
+					<div class="form-group @if(loginForm("userName").hasErrors) {has-error}">
+						<label class="col-sm-1 control-label parameter">Name</label>
+						<div class="col-sm-7">
+							<input type="text" class="form-control"
+						 		   name="@loginForm("userName").name"
+						 		   placeholder="Name">
+						 	<span class="help-block">@{loginForm("userName").error.map { error => error.message }}</span>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-offset-3 col-sm-4">
+							<button type="submit" class="btn btn-default log">Login</button>
+						</div>
+					</div>
+				}
+			</section>
+		</div>
+		<footer class="col-md-12" id="footer">
+			<p> &COPY; 2014 | Dominic Sickel &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Projekt für Web-Technologien von der HTWG-Konstanz</p>
+		</footer>
+	
 	}
 	
 }
