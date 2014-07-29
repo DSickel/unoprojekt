@@ -101,7 +101,7 @@ public class Application extends Controller implements IObserver{
     public static Result spiel_erstellen() {
     	String username = session("User1");
     	GameController gameController = GameController.getInstance();
-    	int gameID = gameController.addGame(username); //Observer übergeben
+    	int gameID = gameController.addGame(username); 
     	Game game = gameController.getGame(gameID);
     	Player player = new Player(username, game.getPlayers().size());
     	System.out.println("GEADDETER SPIELER: " + player.getPlayerName() + " mit der ID: " + player.getiD());
@@ -396,7 +396,7 @@ public class Application extends Controller implements IObserver{
     	};
     }
     
-    public static WebSocket<JsonNode> wsToInformAboutSecondPlayer(){
+    public static WebSocket<JsonNode> lobbyWebSocket(){
     	final Integer gameID = new Integer(session("gameID")); //"cache" here so it's available within the onReady method.
         final String user = new String(session("User1"));
     	final GameController gameController = GameController.getInstance();

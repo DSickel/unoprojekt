@@ -102,6 +102,18 @@ public class Game implements IObserverable {
 		this.currentDirection = direction;
 	}
 	
+	public int getGameID() {
+		return gameID;
+	}
+
+	public void setGameID(int gameID) {
+		this.gameID = gameID;
+	}
+	
+	/**
+	 * Überprüft ob das Spiel voll ist
+	 * @return true, falls 2 Spieler im Spiel sind
+	 */
 	public boolean isFull() {
 		if(players.size() < 2){
 			return true;
@@ -110,6 +122,11 @@ public class Game implements IObserverable {
 		}
 	}
 	
+	/**
+	 * Überprüft ob das Spiel beendet ist
+	 * @return true, wenn Spiel beendet
+	 * 		   false, wenn Spiel noch nicht beendet
+	 */
 	public boolean finished() {
 		if(players.get(currentPlayer).getHandCards().isEmpty()){
 			return true;
@@ -129,7 +146,11 @@ public class Game implements IObserverable {
 		currentPlayer = (currentPlayer + currentDirection + players.size()) % players.size(); 
 	}
 	
-	//Karte(n) ziehen 
+	/**
+	 * Spieler müssen im laufe des Spiels Karten ziehen
+	 * @param player der Karten ziehen muss/will
+	 * @param number Anzahl der Karten
+	 */
 	public void draw(Player player, int number) {
 		
 		for(int i = 0; i < number; i++){
@@ -146,7 +167,14 @@ public class Game implements IObserverable {
 			player.drawCard(cardSet.remove(0));
 		}
 	}
-
+	
+	/**
+	 * Spieler müssen während des Spiels Karten ausspielen
+	 * @param player welcher eine Karte spielen möchte
+	 * @param cardID ID der Karte welche gespielt werden soll
+	 * @return true, falls die Karte spielbar ist
+	 * 		   false, falls die Karte nicht spielbar ist
+	 */
 	public boolean play(Player player, int cardID) {
 		Card card = player.playCard(cardID, cardTray.get(cardTray.size()-1));
 		System.out.println("Kartenstapel vor Spielzug: ColorID: " + cardTray.get(cardTray.size()-1).getColorID() + " ValueID: " + cardTray.get(cardTray.size()-1).getValueID());
@@ -163,6 +191,11 @@ public class Game implements IObserverable {
 		
 	}
 	
+	/**
+	 * Wird einmalig zu Beginn des Spiels aufgerufen!
+	 * Setzt die Startparameter, erstellt die Karten, mischt das Kartendeck und
+	 * ermittelt den Startspieler per Zufallsgenerator
+	 */
 	public void startGame() {
 		//Ermittelt Startspieler
 		this.currentPlayer = (int)(Math.random()*players.size());
@@ -213,13 +246,5 @@ public class Game implements IObserverable {
 			observer.update();
 		}
 		
-	}
-
-	public int getGameID() {
-		return gameID;
-	}
-
-	public void setGameID(int gameID) {
-		this.gameID = gameID;
 	}
 }

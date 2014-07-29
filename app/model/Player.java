@@ -22,6 +22,8 @@ public class Player {
 		handCards = new ArrayList<Card>();
 	}
 
+	/** Getter und Setter */
+	
 	public String getPlayerName() {
 		return playerName;
 	}
@@ -42,6 +44,14 @@ public class Player {
 		handCards.add(setCard);
 	}
 	
+	/**
+	 * Entfernt die Karte aus der Hand des Spielers welcher sie gespielt hat,
+	 * falls die Karte spielbar ist
+	 * @param cardId ID der Karte welche gespielt werden soll
+	 * @param trayCard	oberste Karte auf dem Kartenstapel
+	 * @return Die gespielte Karte, falls sie spielbar ist
+	 * 		   null, falls sie nicht spielbar ist
+	 */
 	public Card playCard(int cardId, Card trayCard){
 		int i = 0;
 		for(Card card : handCards){
@@ -107,16 +117,5 @@ public class Player {
 		}
 		return null;
 	}
-	
-	/*
-	public Card playCard(int index, Card trayCard){
-		if(handCards.get(index).playable(trayCard)) {
-			return handCards.remove(index);
-		}
-		return null;
-	}*/
-	
-	
-	
 	
 }

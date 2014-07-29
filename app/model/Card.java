@@ -40,6 +40,8 @@ public class Card {
 		this.iD = createColorID() + createValueID();
 	}
 
+	/** Getter und Setter */
+	
 	public Color getColor() {
 		return color;
 	}
@@ -86,11 +88,11 @@ public class Card {
 
 
 	/**
-	 * Erstellt eine eindeutige FarbID 
-	 * Blau => 0
-	 * Rot  => 15
-	 * Grün => 30
-	 * Gelb => 45
+	 * Erstellt eine eindeutige ID für die Farbe
+	 * @return 0  für Blau
+	 * 		   15 für Rot
+	 * 		   30 für Grün
+	 * 		   45 für Gelb
 	 */
 	public int createColorID(){
 		int colorID = 0;
@@ -114,6 +116,10 @@ public class Card {
 		return colorID;
 	}
 	
+	/**
+	 * Erstellt eine eindeutige ID für den Wert
+	 * @return 0-12 jenachdem welchen Wert die Karte besitzt
+	 */
 	public int createValueID() {
 		int valueID = 0;
 		
@@ -173,7 +179,11 @@ public class Card {
 		return valueID;
 	}
 		
-	
+	/**
+	 * Überprüft ob eine Karte spielbar ist
+	 * @param trayCard oberste Karte auf dem Kartenstapel
+	 * @return true, falls die Karte spielbar ist
+	 */
 	public boolean playable(Card trayCard) {
 		if(trayCard.getColorID() == this.colorID) {
 			return true;
@@ -184,13 +194,16 @@ public class Card {
 		return false;
 	}
 	
-	/*public boolean playable(Card tableCard) {
-		if(tableCard.value.equals(value) || tableCard.color.equals(color)){
-			return true;
-		}
-		return false;
-	}*/
-	
+	/**
+	 * Karten haben verschiedene Effekte auf das Spiel, diese werden hier bestimmt!
+	 * @param game in welchem die Karte gespielt wird
+	 * 
+	 * Effekte:
+	 * Aussetzen	   : Lässt den nächsten Spieler aussetzen
+	 * Richtungswechsel: Ändert die Spielrichtung
+	 * Plus 2		   : Lässt den nächsten Spieler 2 Karten ziehen
+	 * Default		   : Keinen besonderen Effekt
+	 */
 	public void playEffect(Game game) {
 		System.out.println("PLAY EFFEKT");
 		String value =  getValueID().toString();
