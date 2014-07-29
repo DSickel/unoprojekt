@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.*;
@@ -23,7 +22,7 @@ import model.Player;
 import model.User;
 import play.data.*;
 
-public class Application extends Controller implements IObserver{
+public class Application extends Controller {
 	
 	//Erstellt ein Formular für den Login
 	final static Form<User> loginForm = Form.form(User.class); 
@@ -33,7 +32,7 @@ public class Application extends Controller implements IObserver{
 	
 	//Liste der Websocket Teilnehmer für das Spiel
 	private static List<WebSocket.Out<JsonNode>> connection = new ArrayList<WebSocket.Out<JsonNode>>();
-	
+
 	//Liste der WebSocketTeilnehmer für die Wartelobby
 	private static List<WebSocket.Out<JsonNode>> lobbyConnection = new ArrayList<WebSocket.Out<JsonNode>>(); 
 
@@ -287,9 +286,12 @@ public class Application extends Controller implements IObserver{
                 node.put("type", "start");
                 node.put("startPlayerName", game.getCurrentPlayer().getPlayerName());
                 node.put("startPlayerID", game.getCurrentPlayer().getiD());
+                
                 for(WebSocket.Out<JsonNode> outs : connection) {
 						outs.write(node);
 				}
+              
+                
     			in.onMessage(new Callback<JsonNode>() {
     				public void invoke(JsonNode event) throws Throwable {
     					String action = event.get("type").asText();
@@ -345,11 +347,6 @@ public class Application extends Controller implements IObserver{
     							node.put("userID", userID);
     							node.put("card", cardId);
     						}
-    						
-    					
-    						for(WebSocket.Out<JsonNode> out : connection) {
-    							out.write(node);
-    						}
     					}
     					//Spieler will/muss eine Karte ziehen
     					if(action.equals("draw")) {
@@ -362,9 +359,7 @@ public class Application extends Controller implements IObserver{
 							game.nextPlayer();
 							node.put("userName", game.getCurrentPlayer().getPlayerName());
 							node.put("userID", game.getCurrentPlayer().getiD());
-							for(WebSocket.Out<JsonNode> out : connection) {
-    							out.write(node);
-    						}
+							
     					}
     					
     					//Wird aufgerufen wenn eine Chatnachricht verschickt wird
@@ -376,7 +371,12 @@ public class Application extends Controller implements IObserver{
     						}
     					}
     					
+    					for(WebSocket.Out<JsonNode> out : connection) {
+							out.write(node);
+						}
+    					
     				}
+    				
     			});
     			in.onClose(new Callback0() {
     				
@@ -440,8 +440,6 @@ public class Application extends Controller implements IObserver{
                     in.onClose(new Callback0() {
 
 						public void invoke() throws Throwable {
-							//GameController matchController = GameController.getInstance();
-							//Game match = matchController.getGame(gameID);
 							if (game.getCurrentNumberOfPlayers() == 1) {
 								
 						    	try {
@@ -471,7 +469,7 @@ public class Application extends Controller implements IObserver{
     
     //Interiert über alle Einträge in der Liste der WebSocket Verbindungen
 	public void update() {
-		for(WebSocket.Out<JsonNode> con : gameConnections.values()){
+		for(WebSocket.Out<JsonNode> con : connection){
 			ObjectNode event = Json.newObject();
 			con.notify();
 		}

@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import util.IObserver;
 import util.IObserverable;
 import model.Card.Color;
@@ -247,4 +249,6 @@ public class Game implements IObserverable {
 		}
 		
 	}
+
+	
 }
