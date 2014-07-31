@@ -25,7 +25,7 @@ GET		/warteLobby					controllers.Application.warteLobby()
 GET		/refreshSpieler				controllers.Application.refreshSpieler()
 
 #Spielen
-GET		/loadCardPlayerOne			controllers.Application.loadCardPlayerOne(user)
+GET		/loadCardPlayerOne			controllers.Application.loadCardPlayer(user)
 GET		/loadTrayCard				controllers.Application.loadTrayCard()
 GET		/spiel						controllers.Application.starten()
 

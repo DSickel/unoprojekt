@@ -17,8 +17,7 @@ import model.Card.Value;
  * @author Dominic
  *
  */
-public class Game implements IObserverable {
-	private List<IObserver> observers;
+public class Game extends java.util.Observable {
 	
 	private String gameName;
 	private int gameID;
@@ -31,7 +30,7 @@ public class Game implements IObserverable {
 	private int currentDirection;
 	
 	private int numberOfPlayers;
-	private boolean finished = false;
+	private boolean gameVerfallen = false;
 	
 	/**Konstruktor*/
 	
@@ -40,7 +39,6 @@ public class Game implements IObserverable {
 	}
 	
 	public Game(String gameName, int gameID){
-		this.observers = new ArrayList<IObserver>();
 		this.gameName = gameName;
 		this.gameID = gameID;
 		this.numberOfPlayers = 0;
@@ -131,9 +129,16 @@ public class Game implements IObserverable {
 	 */
 	public boolean finished() {
 		if(players.get(currentPlayer).getHandCards().isEmpty()){
+		
 			return true;
 		}
 		return false;
+	}
+	
+	public void setGameVerfallen() {
+		this.gameVerfallen = true;
+		setChanged();
+		notifyObservers("close");
 	}
 	
 	/**Game Handling*/
@@ -154,11 +159,12 @@ public class Game implements IObserverable {
 	 * @param number Anzahl der Karten
 	 */
 	public void draw(Player player, int number) {
-		
+		System.out.println("GAME.DRAW");
 		for(int i = 0; i < number; i++){
-			
+			System.out.println("Game.draw schleife " + i);
 			//Überprüfung ob cardSet noch Karten beinhaltet, falls nicht mische den cardTray in das cardSet
 			if(cardSet.size() == 0 && cardTray.size() > 0) {
+				System.out.println("CARDSET leer");
 				Card topCard = cardTray.get(0);
 				cardSet.addAll(cardTray.subList(1, cardTray.size()));
 				cardTray.clear();
@@ -168,6 +174,13 @@ public class Game implements IObserverable {
 			//ziehe die oberste Karte vom cardSet
 			player.drawCard(cardSet.remove(0));
 		}
+		if(number != 2){
+			System.out.println("DRAW METHODE NOTIFY!");
+			nextPlayer();
+			setChanged();
+			notifyObservers("cardEvent");
+		}
+		
 	}
 	
 	/**
@@ -185,9 +198,21 @@ public class Game implements IObserverable {
 			System.out.println("Karte kann gespielt werden!");
 			cardTray.add(card);
 			System.out.println("Kartenstapel nach Spielzug: ColorID: " + cardTray.get(cardTray.size()-1).getColorID() + " ValueID: " + cardTray.get(cardTray.size()-1).getValueID());
-			return true;
+			if(finished()){
+				setChanged();
+				notifyObservers("finished");
+				return true;
+			}else{
+				nextPlayer();
+				getCardTray().playEffect(this);
+				setChanged();
+				notifyObservers("cardEvent");
+				return true;
+			}
 		}else{
 			System.out.println("Karte nicht spielbar!");
+			setChanged();
+			notifyObservers("unplayable");
 			return false;
 		}
 		
@@ -226,29 +251,8 @@ public class Game implements IObserverable {
 		
 		//Setze erste Karte des cardTray => Startkarte
 		this.cardTray.add(0, cardSet.remove(0));
+		setChanged();
+		notifyObservers("start");
 	}
-	
-	/**Implementierung des Observerable Patterns */
-	
-	//Game registriert sich beim Observer
-	public void register(IObserver observer) {
-		this.observers.add(observer);
-		
-	}
-	
-	//Game meldet sich vom Observer ab
-	public void unregister(IObserver observer) {
-		this.observers.remove(observer);
-		
-	}
-
-	//Iteriert über die Liste aller Observer und ruft deren update() Methode auf
-	public void notifyObservers() {
-		for(IObserver observer : this.observers){
-			observer.update();
-		}
-		
-	}
-
 	
 }

@@ -27,16 +27,11 @@ public class Application extends Controller {
 	//Erstellt ein Formular für den Login
 	final static Form<User> loginForm = Form.form(User.class); 
 	
-	//Liste um alle Websocket Connections zu speichern
-	private static HashMap<Integer, WebSocket.Out<JsonNode>> gameConnections = new HashMap<Integer, WebSocket.Out<JsonNode>>();
-	
-	//Liste der Websocket Teilnehmer für das Spiel
-	private static List<WebSocket.Out<JsonNode>> connection = new ArrayList<WebSocket.Out<JsonNode>>();
-
 	//Liste der WebSocketTeilnehmer für die Wartelobby
 	private static List<WebSocket.Out<JsonNode>> lobbyConnection = new ArrayList<WebSocket.Out<JsonNode>>(); 
 
-	
+	private static HashMap<Integer, GameObserver> gameObservers = new HashMap<Integer, GameObserver>();
+
 	
 	//Rendert die Index Seite
     public static Result index() {
@@ -92,8 +87,11 @@ public class Application extends Controller {
     //Rendert den ChatRoom
     public static Result testChat(){
     	String username = session("User1");
-    	
-    	return ok(ChatRoom.render(username));
+    	if(username != null){
+    		return TODO;
+    	}else{
+    		return redirect("/login");
+    	}
     }
    
     //Erstellt ein Spiel - FERTIG!
@@ -102,7 +100,7 @@ public class Application extends Controller {
     	GameController gameController = GameController.getInstance();
     	int gameID = gameController.addGame(username); 
     	Game game = gameController.getGame(gameID);
-    	Player player = new Player(username, game.getPlayers().size());
+    	Player player = new Player(username, game.getPlayers().size()+1);
     	System.out.println("GEADDETER SPIELER: " + player.getPlayerName() + " mit der ID: " + player.getiD());
     	game.addPlayer(player);
     	System.out.println("Game: " + game.getGameName() + " ID " + game.getGameID() + " #Spieler " + game.getCurrentNumberOfPlayers());
@@ -172,7 +170,7 @@ public class Application extends Controller {
     public static Result beitreten(String username, String gameID) {
     	GameController gameController = GameController.getInstance();
     	Game game = gameController.getGame(Integer.parseInt(gameID));
-    	Player player = new Player(username, game.getPlayers().size());
+    	Player player = new Player(username, game.getPlayers().size()+1);
     	game.addPlayer(player);
     	
     	System.out.println("--------------- beitreten -------------------");
@@ -224,7 +222,7 @@ public class Application extends Controller {
     }
     
     
-    public static Result loadCardPlayerOne(String user) {
+    public static Result loadCardPlayer(String user) {
     	System.out.println("LOAD GAME WIRD AUFGERUFEN!");
     	GameController gameController = GameController.getInstance();
     	Integer userID = Integer.parseInt(user);
@@ -232,7 +230,7 @@ public class Application extends Controller {
     		return redirect("/startseite");
     	}
     	Integer gameID = Integer.parseInt(session("gameID"));
-    	System.out.println(gameID);
+    	System.out.println("GameID" + gameID);
     	Game game = gameController.getGame(gameID);
     	String result = "[";
     	/*for(Card card : game.getPlayer(0).getHandCards()){
@@ -242,7 +240,7 @@ public class Application extends Controller {
     		result += "{\"cardID\" : " + card.getID() + ", \"currentPlayer\" : " + "\"" + game.getCurrentPlayer().getiD() + "\""+ "},";
     	}
     	result = result.substring(0, result.length() - 1) + "]";
-    	System.out.println("--- Load Player One ------");
+    	System.out.println("--- Load Player "+ user + "  ------");
     	System.out.println(result);
     	System.out.println("=========================");
     	System.out.println("SPIELER " + game.getCurrentPlayer().getPlayerName() + " IST AM ZUG");
@@ -280,8 +278,8 @@ public class Application extends Controller {
     	return new WebSocket<JsonNode>() {
     	
     		public void onReady(WebSocket.In<JsonNode> in, WebSocket.Out<JsonNode> out) {
-    			gameConnections.put(gameID, out);
-    			connection.add(out);
+    			/*gameConnections.put(gameID, out);
+    			//connection.add(out);
     			ObjectNode node = Json.newObject();
                 node.put("type", "start");
                 node.put("startPlayerName", game.getCurrentPlayer().getPlayerName());
@@ -289,9 +287,21 @@ public class Application extends Controller {
                 
                 for(WebSocket.Out<JsonNode> outs : connection) {
 						outs.write(node);
-				}
-              
-                
+				}*/
+    			
+    				if(gameObservers.containsKey(gameID)){
+    				
+    				}else{
+    					gameObservers.put(gameID, new GameObserver(game));
+    				}	
+    					if(host){
+    						gameObservers.get(gameID).host = out;
+    					} else {
+    						gameObservers.get(gameID).guest = out;
+    					}
+    				
+    		    		
+    		    	
     			in.onMessage(new Callback<JsonNode>() {
     				public void invoke(JsonNode event) throws Throwable {
     					String action = event.get("type").asText();
@@ -311,17 +321,18 @@ public class Application extends Controller {
     						//Spielt die Karte
     						if(game.play(game.getCurrentPlayer(), cardId)) {
     							System.out.println("Game.play == TRUE");
-    							String user = event.get("user").asText();
+    							//String user = event.get("user").asText();
     							
     							//Überprüfen ob Spiel fertig ist
-    							if(game.finished()){
-    								node.put("type", "finished");
+    							/*if(game.finished()){
+    								/*node.put("type", "finished");
     								node.put("userID", game.getCurrentPlayer().getiD());
     								node.put("userName", game.getCurrentPlayer().getPlayerName());
+    								System.out.println("GAME FINISHED");
     							
     							}else{//Spiel ist noch nicht fertig
     						
-        							node.put("type", "cardEvent");
+        							/*node.put("type", "cardEvent");
         							node.put("card", cardId);
         							node.put("trayCard", game.getCardTray().getID());
         							node.put("text", user + " macht seinen/ihren Zug..");
@@ -335,17 +346,17 @@ public class Application extends Controller {
         							
         							System.out.println("SPIELER " + game.getCurrentPlayer().getPlayerName() + " IST AM ZUG");
         							System.out.println("=====================");
-    							}
+    							}*/
     							
     							
     						}else {
     							//Karte kann nicht gespielt werden
     							String userID = Integer.toString(game.getCurrentPlayer().getiD());
     							System.out.println("Game.play == FALSE");
-    							node.put("type", "unplayable");
+    							/*node.put("type", "unplayable");
     							node.put("userName", game.getCurrentPlayer().getPlayerName());
     							node.put("userID", userID);
-    							node.put("card", cardId);
+    							node.put("card", cardId);*/
     						}
     					}
     					//Spieler will/muss eine Karte ziehen
@@ -354,26 +365,30 @@ public class Application extends Controller {
     						String user = event.get("user").asText();
     						Integer drawNumber = event.get("number").asInt();
     						game.draw(game.getCurrentPlayer(), drawNumber);
-    						node.put("type", "draw");
+    						/*node.put("type", "draw");
 							node.put("text", user + " muss eine Karte ziehen");
 							game.nextPlayer();
 							node.put("userName", game.getCurrentPlayer().getPlayerName());
-							node.put("userID", game.getCurrentPlayer().getiD());
-							
+							node.put("userID", game.getCurrentPlayer().getiD());*/
+							/** Aalle Node.Put in GameObserver auslagern und dort erstellen 
+							 * Innherhalb der Game Methoden setChanged() und notifyObserver("eventtype z.B draw etc..") 
+							 * aufrufen und dann in der Update Mehode vom GameObserver meine Nodes zusammenbasteln 
+							 */
     					}
     					
     					//Wird aufgerufen wenn eine Chatnachricht verschickt wird
     					if(action.equals("message")){
     						System.out.println("ERREICHT MESSAGE BEFEHLE");
-    				
-    						for(WebSocket.Out<JsonNode> out : connection) {
+    						gameObservers.get(gameID).guest.write(event);
+    						gameObservers.get(gameID).host.write(event);
+    						/*for(WebSocket.Out<JsonNode> out : connection) {
     							out.write(event);
-    						}
+    						}*/
     					}
     					
-    					for(WebSocket.Out<JsonNode> out : connection) {
+    					/*for(WebSocket.Out<JsonNode> out : connection) {
 							out.write(node);
-						}
+						}*/
     					
     				}
     				
@@ -381,14 +396,15 @@ public class Application extends Controller {
     			in.onClose(new Callback0() {
     				
 					public void invoke() throws Throwable {
-						ObjectNode node = Json.newObject();
+						/*ObjectNode node = Json.newObject();
 						node.put("type", "close");
 						node.put("text", "has closed connection!");
-						node.put("user", user);
+						node.put("user", user);*/
+						game.setGameVerfallen();
 						System.out.println("NODE USER CLOSE: " + user);
-						for(WebSocket.Out<JsonNode> out : connection) {
+						/*for(WebSocket.Out<JsonNode> out : connection) {
 							out.write(node);
-						}
+						}*/
 						
 					}
 				});
@@ -467,16 +483,6 @@ public class Application extends Controller {
         };   
     }
     
-    //Interiert über alle Einträge in der Liste der WebSocket Verbindungen
-	public void update() {
-		for(WebSocket.Out<JsonNode> con : connection){
-			ObjectNode event = Json.newObject();
-			con.notify();
-		}
-		
-	}
-	
-	
 	
 }	
 
