@@ -1,0 +1,171 @@
+@(username: String) 
+@javaScript = {
+<script type="text/javascript">
+
+//get websocket class, firefox has a different way to get it
+var WS = window['MozWebSocket'] ? window['MozWebSocket'] : WebSocket;
+
+//create the actual webSocket (get its URL via routes file from play framework)
+var socket = new WS('@routes.Application.lobbyWebSocket().webSocketURL(request)');
+	
+$(function() {
+	//refresh();
+	
+    //define the function which handles messages send to this player.
+    var receiveEvent = function(event) {
+        var data = JSON.parse(event.data);
+        var type = data.type;
+        var user = data.user;
+        
+        if(type == "join"){
+        	refresh();
+        }else
+        if(type == "close"){
+        	console.log(user)
+        	//Buttontext holen
+        	var valueButton = $('#btn_startMatch').text();
+        	console.log("BUTTON"+valueButton);
+        	//Wenn != null keine andere Modalbox öffnen, da bereits eine geöffnet wurde
+        	if(valueButton == ""){
+	        	$('#btn_startMatch').html('Zur Startseite!');
+		        $('#messages').html('Verbindung zu Spieler '+ user +' wurde unterbrochen!');
+		        // Modaldialog anzeigen
+		        $('#playerJoined').modal({
+		            "backdrop": "static",
+		            "keyboard": true,
+		            "show": true
+		        });       
+		        // zur Startseite zurück nach Klick
+		        $('#btn_startMatch').click(function() {
+		            window.location.replace("./startseite");
+		        });    
+		        // Kehre nach 5 Sekunden automatisch zur Startseite zurück
+		        setTimeout(function() {
+		            $('#btn_startMatch').click();
+		        }, 5000);
+        	}
+        }else
+        if(type == "start"){
+        	console.log(user)
+        	$('#btn_startMatch').html('Zum Spiel!');
+	        $('#messages').html('Spiel wurde von '+ user +' gestartet!');
+	        // Modaldialog anzeigen
+	        $('#playerJoined').modal({
+	            "backdrop": "static",
+	            "keyboard": true,
+	            "show": true
+	        });       
+	        // Starte das Spiel nach einem Klick
+	        $('#btn_startMatch').click(function() {
+	            window.location.replace("./spiel");
+	        });    
+	        // Starte das SPiel automatisch nach 5 Sekunden
+	        setTimeout(function() {
+	            $('#btn_startMatch').click();
+	        }, 5000);
+	        
+        }else{
+        	alert("Zu wenig Spieler, Spiel kann noch nicht gestartet werden!");
+        }
+    };
+	socket.onmessage = receiveEvent;
+});
+
+/**
+ * wird jedesmal aufgerufen wenn ein Spieler der Wartelobby beitritt um die Spielerliste zu updaten
+ */
+function refresh() {
+    $('#spielerliste').empty();
+    $.ajax({
+        url: "refreshSpieler",
+        dataType: "json",
+        success: function(result) {
+        	console.log("SUCCESS");
+            $(result).each(function(index, obj) {
+                $('#spielerliste').append('<li><h3 class="listElement">' + obj.playerName + '</h3></li>');
+            });
+        }
+    });
+};
+
+/**
+ * Startanfrage wird an das WebSocket gesendet
+ */
+function starten(){
+	console.log("ERREICHT starten")
+	var jsonMessage = {
+			type: "start",
+			user: "@username",
+	};
+	socket.send(JSON.stringify(jsonMessage));
+}
+
+
+</script>
+} 
+
+@main("Warten")(javaScript) {
+	<header class="col-md-12" id="header">
+			<a class="btn btn-link" href="@routes.Application.impressum()">Impressum</a>
+			<a class="btn btn-link" href="@routes.Application.startseiteGet()">Startseite</a>
+			<a class="btn btn-link" href="@routes.Application.login()">Ausloggen</a>
+	</header>
+	<div class="col-md-12 start">
+		<section class="col-md-6 logo">
+			<h1 class="startCenter"><span class="blueText">Will</span><span class="greenText">kom</span><span class="redText">men</span> <span class="yellowText">bei</span></h1>
+			<div id="unologo">
+				<br></br>
+				<br></br>
+				<br></br>
+				<h1>UNO</h1>
+				<h1>UNO</h1>
+				<br></br>
+				<br></br>
+				<br></br>
+			</div>
+			<h1 class="startCenter"><span class="greenText">On</span><span class="yellowText">li</span><span class="redText">ne</span></h1>
+			<h3 class="startCenter">Ein Projekt von <del>B.Pllana,</del> D.Sickel <del>und V.Weirich</del></h3>
+		</section>
+		<section class="col-md-6 startContent">
+			<h1>Wartelobby</h1>
+			<br>
+			<h2>Momentan warten Sie auf weitere Spieler</h2>
+			<br>
+			<h3>Aktive Spieler:</h3>
+			<div id="spieler">
+				<ul id="spielerliste">
+					<li> Sollte was stehen hier</li>
+				</ul>
+			</div>
+	 		<div class="buttons">
+				<button type="button" class="btn btn-lg btn-default" onclick="starten()">Spiel starten </button>
+			</div>
+		</section>
+	</div>
+	<footer class="col-md-12" id="footer">
+		<p> &COPY; 2014 | Dominic Sickel &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Projekt für Web-Technologien von der HTWG-Konstanz</p>
+	</footer>
+
+
+
+<!-- set up the modal to start hidden and fade in and out -->
+<div id="playerJoined" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content text-center">
+			<!-- dialog body -->
+			<div class="modal-body">
+				<br>
+				<h3 id="messages">
+					
+				</h3>
+			</div>
+			<!-- dialog buttons -->
+			<div class="modal-footer">
+				<button id="btn_startMatch" type="button"
+					class="btn btn-lg btn-success"></button>
+			</div>
+		</div>
+	</div>
+</div>
+
+}

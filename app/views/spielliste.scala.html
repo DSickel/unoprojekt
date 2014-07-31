@@ -1,0 +1,67 @@
+@(user: String)
+@javaScript = {
+<script type="text/javascript">
+
+$(function() {
+	refresh();
+});
+
+function refresh() {
+    $('#spielliste').empty();
+    $.ajax({
+        url: "refresh",
+        dataType: "json",
+        success: function(result) {
+        	console.log("SUCCESS");
+            $(result).each(function(index, obj) {
+                $('#spielliste').append('<h3 class="listElement" onclick="joinGame(' + obj.gameID + ')">' + obj.gameName + '&acute;s Spiel</h3>');
+            });
+        }
+    });
+};
+
+function joinGame(gameID) {
+	window.location.href = '/spielBeitreten?username=@user&gameID=' + gameID.toString();
+}
+
+
+</script>
+}
+
+@main("Startseite")(javaScript) {
+	<header class="col-md-12" id="header">
+			<a class="btn btn-link" href="@routes.Application.impressum()">Impressum</a>
+			<a class="btn btn-link" href="@routes.Application.startseiteGet()">Startseite</a>
+			<a class="btn btn-link" href="@routes.Application.login()">Ausloggen</a>
+	</header>
+	<div class="col-md-12 start">
+		<section class="col-md-6 logo">
+			<h1 class="startCenter"><span class="blueText">Will</span><span class="greenText">kom</span><span class="redText">men</span> <span class="yellowText">bei</span></h1>
+			<div id="unologo">
+				<br></br>
+				<br></br>
+				<br></br>
+				<h1>UNO</h1>
+				<h1>UNO</h1>
+				<br></br>
+				<br></br>
+				<br></br>
+			</div>
+			<h1 class="startCenter"><span class="greenText">On</span><span class="yellowText">li</span><span class="redText">ne</span></h1>
+			<h3 class="startCenter">Ein Projekt von D.Sickel</h3>
+		</section>
+		<section class="col-md-6 startContent">
+			<h2>Hallo @user hier sehen Sie die aktuell laufenden Spiele</h2>
+			<div id="spiele">
+				<ul id="spielliste">
+					
+				</ul>
+			</div>
+			<button id="refresh" type="button" onclick="refresh()" class="btn btn-default">Aktualisieren</button>
+		</section>
+	</div>
+	<footer class="col-md-12" id="footer">
+		<p> &COPY; 2014 | Dominic Sickel &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Projekt für Web-Technologien von der HTWG-Konstanz</p>
+	</footer>
+
+}

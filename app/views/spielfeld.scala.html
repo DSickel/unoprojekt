@@ -1,0 +1,781 @@
+@(player1: String)(player2: String)(username: String)(userID: String)
+
+@javaScript = {
+<script type="text/javascript">
+
+var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+
+//open connection with websocket
+var socket = new WS('@routes.Application.gameWebSocket().webSocketURL(request)');
+
+
+$(function(){
+	loadCardPlayer2();
+	loadCardPlayer1();
+	loadTrayCard();
+	
+	var receiveEvent = function(event) {
+		var data = JSON.parse(event.data)
+	
+		//Überprüfe um welchen Eventtype es sich handelt um entsprechend zu reagieren
+		if(data.type == "cardEvent"){
+			
+			var cardID = data.card;
+			var playerName = data.userName; 
+			var playerID = data.userID;
+			console.log(playerID);
+			var cardTray = data.trayCard;
+			//Hinterlege Namen der Spieler mit grün und rot
+			if(playerID == "@userID"){
+				//Spieler ist am Zug - grün
+				$("#amZug").css("background-color", "green"); 
+			}else{
+				//Spieler ist nicht am Zug - rot
+				$("#amZug").css("background-color", "red");
+			}
+			//Lade alle nötigen Daten nach
+			loadCardPlayer1();
+			loadCardPlayer2();
+			loadTrayCard();
+		}
+		
+		if(data.type == "message"){
+		
+	    	console.log(event.data);
+	    	var date = new Date();
+	    	var hours = date.getHours();
+	    	var minutes = date.getMinutes();
+	    	if(minutes < 10){
+	    		minutes = "0"+minutes;
+	    	}
+	        $('#chatoutput').append('<p>' +data.user+ ' [' +hours+ ':' +minutes+ ']: ' +data.text+ '</p>');
+	    }
+		
+		if(data.type == "unplayable"){
+			
+			console.log(event.data);
+			var playerID = data.userID;
+			var cardId = data.card;
+			if(playerID == "@userID"){
+				alert("Diese Karte ist nicht spielbar! Bitte ziehe eine Karte oder spiele eine andere Karte!")
+			}
+			
+		}
+		
+		if(data.type == "finished") {
+		
+			var playerID = data.userID;
+			var playerName = data.userName;
+			$('#winningPlayer').html(playerName + "(" +playerID+ ")");
+			//Spiel ist beended, starte die Modalbox um den Gewinner bekannt zu geben
+			$('#finished').modal({
+				"backdrop" : "static",
+				"keyboard" : true,
+				"show" : true
+			});
+
+			$('#btn_finished').click(function() {
+				window.location.replace("./startseite");
+			});
+			//Kehre nach 10 Sekunden automatisch auf die Startseite zurück
+			setTimeout(function() {
+				$('#btn_finished').click();
+			}, 10000);
+		}
+		
+		if(data.type == "close") {
+		
+			if($('#winningPlayer').text() == ""){
+				$('#finishedMessage').html('Spieler <span class="redText"> @player2 </span> hat das Spiel verlassen!');
+				$('#finished').modal({
+					"backdrop" : "static",
+					"keyboard" : true,
+					"show" : true
+				});
+
+				$('#btn_finished').click(function() {
+					window.location.replace("./startseite");
+				});
+
+				setTimeout(function() {
+					$('#btn_finished').click();
+				}, 10000);
+			}
+		}
+	};
+		
+	socket.onmessage = receiveEvent;
+	
+
+	 $("#input").click(function(event){
+  	   var jsonMessage = {
+ 	    		type: "message",
+ 	    		user: "@username",
+ 	    		text: document.getElementById("chatinput").value
+ 	    	};
+          socket.send(JSON.stringify(jsonMessage));
+          $("#chatinput").val('');    
+ 	 }); 
+  
+  	$('#chatinput').keyup(function(event){
+      var charCode = (event.which) ? event.which : event.keyCode ;
+      // if enter (charcode 13) is pushed, send message, then clear input field
+      if(charCode === 13){
+      	var jsonMessage = {
+	   	    		type: "message",
+	   	    		user: "@username",
+	   	    		text: document.getElementById("chatinput").value
+	   	    };
+          socket.send(JSON.stringify(jsonMessage));
+          $(this).val('');    
+      }
+  }); 
+});
+
+function blockCard(id, currentPlayer) { 
+	if(currentPlayer != @userID) {
+		alert("Du Dummbatz du bist nicht am Zug!");
+	}else{
+		send(id);
+	}
+};
+
+function send(id) {
+	//Der erste Char jeder ID ist "k", schneide diesen heraus um die reine ID zu übermitteln
+	var cardID = id.slice(1);
+	var jsonMessage = {
+		type : "cardEvent",
+		user : "@username",
+		card : cardID
+	};
+	socket.send(JSON.stringify(jsonMessage));
+};
+
+function loadCardPlayer2() {
+	console.log("TEST")
+	$("#kartenSP2").empty();
+	$.ajax({
+        url: "loadCardPlayerOne?user=1",
+        dataType: "json",
+        success: function(result) {
+            $(result).each(function(index, obj) {
+                $('#kartenSP2').append('<div class="karte_horizontal" id="verdeckt">  </div>');
+            });
+        }
+    });
+	console.log("TEST2")
+	
+};
+
+function loadCardPlayer1() {
+	console.log("TEST")
+	$("#kartenSP1").empty();
+	$.ajax({
+        url: "loadCardPlayerOne?user=0",
+        dataType: "json",
+        success: function(result) {
+            $(result).each(function(index, obj) {
+            	var currentPlayer = obj.currentPlayer;
+                $('#kartenSP1').append('<div class="karte_horizontal" id="k'+ obj.cardID +'" onclick="blockCard(this.id,'+currentPlayer+')"></div>');
+            });
+        }
+    });
+	console.log("TEST2")
+	
+};
+
+function loadTrayCard() {
+	console.log("TRAYCARD TEST")
+	$.ajax({
+		url: "loadTrayCard",
+		dataType: "json",
+		success: function(result) {
+			$(result).each(function(index, obj) {
+				var currentPlayer = obj.currentPlayer;
+                $('#kartenstapel').html('<div class="stapel" id="k'+ obj.cardID +'"></div>');
+                $('#gameoutput').html('<h3 class="blueText">Spieler ' +currentPlayer+ ' ist am Zug!</h3>');
+            });
+		}
+	});
+};
+
+function ziehen(number) {
+	var jsonMessage = {
+			type: "draw",
+			user: "@username",
+			number: number,	
+	};
+	socket.send(JSON.stringify(jsonMessage));
+};
+
+
+
+</script>
+} 
+@main("Spielfeld")(javaScript) {
+
+<style>
+/*#container {
+	background-color: grey;
+	margin-left: auto;
+	margin-right: auto;
+	width: 1300px;
+}*/
+
+#links {
+	background-color: blue;
+	width: 200px;
+	float: left;
+	padding: 0px 10px;
+}
+
+#rechts {
+	background-color: blue;
+	width: 200px;
+	float: right;
+	padding: 0px 10px;
+}
+
+#mitte {
+	background-color: yellow;
+	margin-left: 225px;
+	margin-right: 225px;
+}
+
+#deckundstapel {
+	margin: 10px;
+	padding: 5px;
+	background-color: green;
+	height: 280px;
+}
+
+#deck {
+	background: url(/assets/images/deckblatt.png);
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+	padding: 5px;
+	margin: 10px;
+	margin-top: 80px;
+	float: left;
+	height: 120px;
+	width: 80px;
+}
+
+.stapel {
+	padding: 5px;
+	margin: 10px;
+	margin-top: 80px;
+	float: left;
+	height: 120px;
+	width: 80px;
+}
+
+#spieler1 {
+	background-color: orange;
+	margin: 80px;
+	height: 160px;
+}
+
+#spieler2 {
+	background-color: orange;
+	margin: 80px;
+	height: 160px;
+}
+
+#spieler3 {
+	background-color: orange;
+	margin: 8px;
+	margin-top: 80px;
+	height: 640px;
+}
+
+#spieler4 {
+	background-color: orange;
+	margin-top: 80px;
+	height: 640px;
+}
+
+#kartenSP2 {
+	margin: 5px;
+	background-color: green;
+}
+
+#kartenSP1 {
+	margin: 5px;
+	background-color: green;
+}
+
+.karte_horizontal {
+	padding: 2px;
+	background-color: purple;
+	padding: 5px;
+	margin: 5px;
+	float: left;
+	height: 120px;
+	width: 80px;
+}
+
+span {
+	color: black;
+}
+
+#verdeckt{
+	background: url(/assets/images/deckblatt.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+
+/* Karten IDs verarbeiten damit richtiges IMG erscheint 
+
+ Alle Blauen Karten */
+#k0{
+	background: url(/assets/images/blau0.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k1{
+	background: url(/assets/images/blau1.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k2{
+	background: url(/assets/images/blau2.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k3{
+	background: url(/assets/images/blau3.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k4{
+	background: url(/assets/images/blau4.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k5{
+	background: url(/assets/images/blau5.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k6{
+	background: url(/assets/images/blau6.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k7{
+	background: url(/assets/images/blau7.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k8{
+	background: url(/assets/images/blau8.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k9{
+	background: url(/assets/images/blau9.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k10{
+	background: url(/assets/images/blauRW.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k11{
+	background: url(/assets/images/blau2plus.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k12{
+	background: url(/assets/images/blauAS.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+
+/* Alle Roten Karten */
+#k15{
+	background: url(/assets/images/rot0.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k16{
+	background: url(/assets/images/rot1.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k17{
+	background: url(/assets/images/rot2.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k18{
+	background: url(/assets/images/rot3.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k19{
+	background: url(/assets/images/rot4.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k20{
+	background: url(/assets/images/rot5.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k21{
+	background: url(/assets/images/rot6.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k22{
+	background: url(/assets/images/rot7.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k23{
+	background: url(/assets/images/rot8.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k24{
+	background: url(/assets/images/rot9.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k25{
+	background: url(/assets/images/rotRW.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k26{
+	background: url(/assets/images/rot2plus.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k27{
+	background: url(/assets/images/rotAS.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+
+/* Alle Grünen Karten */
+#k30{
+	background: url(/assets/images/gruen0.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k31{
+	background: url(/assets/images/gruen1.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k32{
+	background: url(/assets/images/gruen2.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k33{
+	background: url(/assets/images/gruen3.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k34{
+	background: url(/assets/images/gruen4.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k35{
+	background: url(/assets/images/gruen5.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k36{
+	background: url(/assets/images/gruen6.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k37{
+	background: url(/assets/images/gruen7.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k38{
+	background: url(/assets/images/gruen8.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k39{
+	background: url(/assets/images/gruen9.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k40{
+	background: url(/assets/images/gruenRW.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k41{
+	background: url(/assets/images/gruen2plus.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k42{
+	background: url(/assets/images/gruenAS.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+
+/* Alle Gelben Karten */
+#k45{
+	background: url(/assets/images/gelb0.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k46{
+	background: url(/assets/images/gelb1.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k47{
+	background: url(/assets/images/gelb2.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k48{
+	background: url(/assets/images/gelb3.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k49{
+	background: url(/assets/images/gelb4.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k50{
+	background: url(/assets/images/gelb5.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k51{
+	background: url(/assets/images/gelb6.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k52{
+	background: url(/assets/images/gelb7.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k53{
+	background: url(/assets/images/gelb8.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k54{
+	background: url(/assets/images/gelb9.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k55{
+	background: url(/assets/images/gelbRW.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k56{
+	background: url(/assets/images/gelb2plus.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+#k57{
+	background: url(/assets/images/gelbAS.png);
+	background-size: 100% 100%;
+	text-indent: 100%;
+ 	white-space: nowrap;
+  	overflow: hidden;
+}
+
+
+</style>
+<div id="container">
+		<!--<div id="links">
+			<div id="spieler3">
+						Container für Spieler 3
+						<div class="karten_vertikal">
+							<div class="karte1">
+								Karte 1 SP3
+							</div>
+						</div>
+		</div>-->
+	<div id="mitte">
+		<div id="spieler2">
+			Spieler2 : @player2
+			<div id="kartenSP2">
+			</div>
+		</div>
+		<span id="gameoutput">SPIELFELD 1!!</span>
+		<span id="spielerZug"></span>
+		<div id="deckundstapel">
+			Container fuer Kartendeck und Kartenstapel
+			<div id="kartendeck">
+				<div id="deck" onclick="ziehen(1)"></div>
+			</div>
+			<div id="kartenstapel">
+				<div id="stapel"></div>
+			</div>
+		</div>
+		<div id="spieler1">
+			<span id="amZug">Spieler 1 : @player1</span>
+			<div id="kartenSP1">
+			</div>
+		</div>
+	</div>
+	<!--<div id="rechts">
+		<div id="spieler4">
+						Container für Spieler 4
+						<div class="karten_vertikal">
+							<div class="karte1">
+								Karte 1 SP4
+							</div>
+						</div>
+					</div>
+	</div>-->
+	<div id="chat">
+		<p>Chatfenster:</p>
+	</div>
+	<p id="chatoutput"></p>
+	<div id="chatfenster">
+		<input id="chatinput" type="text" />
+		<button id="input">Send</button>
+	</div>
+</div>
+<!-- set up the modal to start hidden and fade in and out -->
+<div id="finished" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content text-center">
+			<!-- dialog body -->
+			<div class="modal-body">
+				<br>
+				<h3 id="finishedMessage">
+					Spieler <span class="greenText" id="winningPlayer"></span> hat gewonnen!
+				</h3>
+			</div>
+			<!-- dialog buttons -->
+			<div class="modal-footer">
+				<button id="btn_finished" type="button"
+					class="btn btn-lg btn-success">Zur Startseite!</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+}
