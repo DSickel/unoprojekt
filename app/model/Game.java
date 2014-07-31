@@ -3,12 +3,6 @@ package model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import util.IObserver;
-import util.IObserverable;
 import model.Card.Color;
 import model.Card.Value;
 
@@ -227,16 +221,17 @@ public class Game extends java.util.Observable {
 		//Ermittelt Startspieler
 		this.currentPlayer = (int)(Math.random()*players.size());
 		this.currentDirection = 1;
-		this.numberOfPlayers = numberOfPlayers;
+		//this.numberOfPlayers = numberOfPlayers;
 		this.cardSet = new ArrayList<Card>();
 		this.cardTray = new ArrayList<Card>();
-		this.players = players;
+		//this.players = players;
 		
 		//füge jeweils 4 Karten jeder Sorte dem cardSet hinzu
 		for(Color color : Color.values()) {
 			for(Value value : Value.values()) {
-				for(int count = 4; count >= 4; count--) {
+				for(int count = 4; count >= 0; count--) {
 					Card card = new Card(color, value);
+					System.out.println("Karte erstellt: " + card.getColor() + " " + card.getValue() );
 					cardSet.add(card);
 				}
 			}
